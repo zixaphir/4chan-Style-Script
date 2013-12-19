@@ -1,9 +1,12 @@
-# This userscript is no longer being maintained.
+# THE FOLLOWING WILL APPLY IF / WHEN THIS SCRIPT IS RE-RELEASED
+# IGNORE FOR NOW
 
-# [Click Here to Install](https://github.com/ahodesuka/4chan-Style-Script/raw/stable/4chanSS.user.js)
+# This userscript is actively maintained for bug fixes and compatibility with supported scripts ONLY
+# Feature Requests must come in the form of a feature-complete pull request
 
-Mayhem's 4chan X v3 is NOT supported.
-Either use mayhem's v2 or my own fork below.
-# [Click Here to Install 4chan X](https://github.com/ahodesuka/4chan-x/raw/stable/4chan_x.user.js)
+# [Click Here to Install](https://github.com/zixaphir/4chan-Style-Script/raw/stable/4chanSS.user.js)
 
-Ensure the `Persistent QR` option is checked in 4chan X's settings.
+This script is designed for use with seaweedchan's 4chan X. Other versions may work, but are not supported.
+# [Install 4chan X](https://seaweedchan.github.io/4chan-x)
+
+The `Persistent QR` option 4chan X's settings should be enabled for the intended experience.

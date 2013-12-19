@@ -707,9 +707,7 @@ SS =
         if /^(Selected|Hidden)+\s(Mascots|Themes?)+$/.test key
           return parseInt val if key is "Selected Theme"
           return 0 if key is "Selected Mascots" and val is 0
-        
-          ret = []
-          return parseInt value for value in val
+          return (parseInt value for value in val)
   
         return (if Array.isArray(val) and typeof val[0] isnt "object" then val[0] else val)
   
@@ -723,6 +721,7 @@ SS =
           if SS.conf["Sidebar Position"] isnt 2 and SS.conf["Sidebar Position"] isnt 5 then "right" else "left"
         SS.conf["Sidebar Position oString"] = 
           if SS.conf["Sidebar Position String"] is "right" then "left" else "right"
+      return
   
     get: (name) ->
       val = if @hasGM

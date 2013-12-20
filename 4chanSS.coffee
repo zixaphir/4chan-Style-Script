@@ -1534,7 +1534,7 @@ SS =
           tripColor:   "228854",
           titleColor:  "cc1105",
           timeColor:   "800000",
-          customCSS:   '#delform,.reply,.hidden_thread,.stub{border-radius:0!important}\n.reply,.hidden_thread,.stub{border-left:0!important;border-top:0!important;"+($SS.conf["Layout"]==1?"border-right:0!important":"")+"}'
+          customCSS:   '#delform,.reply,.hidden_thread,.stub{border-radius:0!important}\n.reply,.hidden_thread,.stub{border-left:0!important;border-top:0!important;"+(SS.conf["Layout"]==1?"border-right:0!important":"")+"}'
         },{
           name:    "Yotsuba B",
           "default":   true,
@@ -1556,7 +1556,7 @@ SS =
           tripColor:   "228854",
           titleColor:  "0f0c5d",
           timeColor:   "000000",
-          customCSS:   '#delform,.reply,.hidden_thread,.stub{border-radius:0!important}\n.reply,.hidden_thread,.stub{border-left:0!important;border-top:0!important;"+($SS.conf["Layout"]==1?"border-right:0!important":"")+"}'
+          customCSS:   '#delform,.reply,.hidden_thread,.stub{border-radius:0!important}\n.reply,.hidden_thread,.stub{border-left:0!important;border-top:0!important;"+(SS.conf["Layout"]==1?"border-right:0!important":"")+"}'
         },{
           name:    "安心院なじみ",
           "default":   true,
@@ -1643,7 +1643,7 @@ SS =
           tripColor:   "bf7f3f",
           titleColor:  "4c4c4c",
           timeColor:   "4c4c4c",
-          customCSS:   '"+($SS.conf["Layout"]===2?".opContainer{display:block!important;border:1px solid "+this.brderColor.hex+"!important;"+($SS.conf["Sidebar Position"]===3?"margin-left:-"+($SS.conf["Side Margin"]+2)+"px!important;padding-left:"+($SS.conf["Side Margin"]+2)+"px!important}.opContainer,":"}"):"")+".post.reply{background:-webkit-linear-gradient(top,rgba(244,244,244,.8),rgba(239,239,239,.8))!important;background:-moz-linear-gradient(top,rgba(244,244,244,.8),rgba(239,239,239,.8))!important;background:-o-linear-gradient(top,rgba(244,244,244,.8),rgba(239,239,239,.8))!important;box-shadow:0 2px 5px rgba(0,0,0,.05)!important}.reply.highlight,.qphl{border-color:rgba("+this.linkHColor.rgb+",.6)!important}'
+          customCSS:   '"+(SS.conf["Layout"]===2?".opContainer{display:block!important;border:1px solid "+this.brderColor.hex+"!important;"+(SS.conf["Sidebar Position"]===3?"margin-left:-"+(SS.conf["Side Margin"]+2)+"px!important;padding-left:"+(SS.conf["Side Margin"]+2)+"px!important}.opContainer,":"}"):"")+".post.reply{background:-webkit-linear-gradient(top,rgba(244,244,244,.8),rgba(239,239,239,.8))!important;background:-moz-linear-gradient(top,rgba(244,244,244,.8),rgba(239,239,239,.8))!important;background:-o-linear-gradient(top,rgba(244,244,244,.8),rgba(239,239,239,.8))!important;box-shadow:0 2px 5px rgba(0,0,0,.05)!important}.reply.highlight,.qphl{border-color:rgba("+this.linkHColor.rgb+",.6)!important}'
         },{
           name:    "violaceous",
           author:    "!MaSoOdDwDw",
@@ -1784,19 +1784,19 @@ SS =
       ]
 
       init: ->
-        if $SS.conf["Themes"] = Array.isArray $SS.conf["Themes"]
-          @defaults.concat $SS.conf["Themes"]
+        if SS.conf["Themes"] = Array.isArray SS.conf["Themes"]
+          @defaults.concat SS.conf["Themes"]
         else
           @defaults.slice 0
 
-        i = if $SS.conf["SFW/NSFW Themes"] and $SS.location.nsfw
-          $SS.conf["NSFW Theme"]
+        i = if SS.conf["SFW/NSFW Themes"] and SS.location.nsfw
+          SS.conf["NSFW Theme"]
         else
-          $SS.conf["Selected Theme"]
+          SS.conf["Selected Theme"]
 
-        tIndex = if $SS.conf["Themes"][i] then i else 0
+        tIndex = if SS.conf["Themes"][i] then i else 0
 
-        $SS.theme = new $SS.Theme tIndex # Set the active theme.
+        SS.theme = new SS.Theme tIndex # Set the active theme.
 
     # MASCOTS
     Mascots:
@@ -1916,32 +1916,32 @@ SS =
       }]
 
       init: ->
-        $SS.conf["Mascots"] = if Array.isArray $SS.conf["Mascots"]
-          @defaults.concat $SS.conf["Mascots"]
+        SS.conf["Mascots"] = if Array.isArray SS.conf["Mascots"]
+          @defaults.concat SS.conf["Mascots"]
         else
           @defaults.slice 0
 
         eMascot = []
 
-        if $SS.conf["Selected Mascots"] is 0
-          eMascot = $SS.conf["Mascots"];
+        if SS.conf["Selected Mascots"] is 0
+          eMascot = SS.conf["Mascots"];
           mIndex  = Math.floor(Math.random() * eMascot.length);
         else
           eMascot.push j for mascot in SS.conf["Selected Mascots"] when not (
-            $SS.conf["Mascots"][mascot].boards? or mascot.boards.split(",").indexOf($SS.location.board) is -1
+            SS.conf["Mascots"][mascot].boards? or mascot.boards.split(",").indexOf(SS.location.board) is -1
           )
 
           if eMascot.length is 0
-            return $SS.mascot = new $SS.Mascot -1
+            return SS.mascot = new SS.Mascot -1
           else
             mIndex = eMascot[Math.floor Math.random() * eMascot.length]
 
-        $SS.mascot = new $SS.Mascot mIndex # the active mascot.
+        SS.mascot = new SS.Mascot mIndex # the active mascot.
 
     pages:
       hasInit: false
       init: ->
-        if not @hasInit and $SS.conf["Pages Position"] is 1
+        if not @hasInit and SS.conf["Pages Position"] is 1
           return if $("#pagesDrop").exists()
 
           pages  = $(".pagelist .pages>*")
@@ -1964,16 +1964,16 @@ SS =
 
           $("#boardNavDesktop").prepend select
           @hasInit = true
-        else if @hasInit && $SS.conf["Pages Position"] isnt 1
+        else if @hasInit && SS.conf["Pages Position"] isnt 1
           $("#pagesDrop").remove()
           @hasInit = false
 
     tripHider:
       hasInit: false
       init: (input) ->
-        if @hasInit && !$SS.conf["Smart Tripcode Hider"]
+        if @hasInit && !SS.conf["Smart Tripcode Hider"]
           $("input[name=name]").each ->
-            $(@).unbind("blur", $SS.tripHider.handle).removeClass("tripping")
+            $(@).unbind("blur", SS.tripHider.handle).removeClass("tripping")
           @hasInit = false
         else
           input.bind "blur", @handle
@@ -1991,7 +1991,7 @@ SS =
     menuEntries:
       hasInit: false
       init: ->
-        if not @hasInit and $SS.conf["Show/Hide Menu Entry"]
+        if not @hasInit and SS.conf["Show/Hide Menu Entry"]
           a = document.createElement "a"
           a.href = "javascript:;"
 
@@ -2029,17 +2029,17 @@ SS =
       hasInit: false,
       init: ->
         unless @hasInit
-          unless $SS.browser.webkit
-            unless $SS.conf["Hide Checkboxes"]
+          unless SS.browser.webkit
+            unless SS.conf["Hide Checkboxes"]
               $("input[type=checkbox]:not(#imageExpand)").riceCheck()
             else
               $("input#prefetch").riceCheck()
 
-          if $SS.location.board is "f"
+          if SS.location.board is "f"
             $(".postarea input[type=file]").riceFile()
 
           @hasInit = true;
-        else unless $SS.browser.webkit and $SS.conf["Hide Checkboxes"] and $(".postInfo>.riceCheck").exists()
+        else unless SS.browser.webkit and SS.conf["Hide Checkboxes"] and $(".postInfo>.riceCheck").exists()
           $("input[type=checkbox]:not(#imageExpand)").riceCheck();
           @hasInit = false;
 
@@ -2066,7 +2066,7 @@ SS =
     css: ->
 
     bind: (el) ->
-      el.color = new $SS.jscolor.color(el) if not el.color
+      el.color = new SS.jscolor.color(el) if not el.color
 
     fetchElement: (mixed) ->
       if typeof mixed is "string" then $.id mixed else mixed
@@ -2272,11 +2272,11 @@ SS =
             [v,m,n]
 
       removePicker = ->
-        delete $SS.jscolor.picker.owner
-        $.rm $SS.jscolor.picker.boxB
+        delete SS.jscolor.picker.owner
+        $.rm SS.jscolor.picker.boxB
 
       drawPicker = (x, y) ->
-        unless p = $SS.jscolor.picker
+        unless p = SS.jscolor.picker
           elements = ['box', 'boxB', 'pad', 'padB', 'padM', 'sld', 'sldB', 'sldM', 'btn']
           p = {}
           for item in elements
@@ -2286,7 +2286,7 @@ SS =
           p.btnS = $.el 'span', {className: 'jscBtnS'}
           p.btnT = $.tn 'Close'
 
-          $SS.jscolor.picker = p
+          SS.jscolor.picker = p
 
           p.box.appendChild  child for child in [p.sldB, p.sldM, p.padB, p.padM, p.btn]
           p.sldB.appendChild p.sld
@@ -2313,7 +2313,7 @@ SS =
         padM.onmouseup =
         padM.onmouseout = -> if holdPad
           holdPad = false
-          $SS.jscolor.fireEvent valueElement, 'change'
+          SS.jscolor.fireEvent valueElement, 'change'
         padM.onmousedown = (e) ->
           # If the slider is at the bottom, move it up
 
@@ -2326,7 +2326,7 @@ SS =
         sldM.onmouseup =
         sldM.onmouseout = -> if holdSld
           holdSld = false
-          $SS.jscolor.fireEvent valueElement, 'change'
+          SS.jscolor.fireEvent valueElement, 'change'
         sldM.onmousedown = (e) ->
           holdSld = true
           setSld e
@@ -2338,27 +2338,27 @@ SS =
         redrawPad()
         redrawSld()
 
-        $SS.jscolor.picker.owner = THIS
+        SS.jscolor.picker.owner = THIS
         $.add ThemeTools.dialog, p.boxB
 
       # redraw the pad pointer
       redrawPad = ->
         # The X and Y positions of the picker crosshair, based on the hsv Hue and Saturation values as percentages and the picker's dimensions.
-        $SS.jscolor.picker.padM.style.backgroundPosition =
+        SS.jscolor.picker.padM.style.backgroundPosition =
           "#{4 + Math.round (THIS.hsv[0] / 6) * 180}px #{4 + Math.round (1 - THIS.hsv[1]) * 100}px"
 
         rgb = HSV_RGB(THIS.hsv[0], THIS.hsv[1], 1)
-        $SS.jscolor.picker.sld.style.backgroundColor = "rgb(#{rgb[0] * 100}%, #{rgb[1] * 100}%, #{rgb[2] * 100}%)"
+        SS.jscolor.picker.sld.style.backgroundColor = "rgb(#{rgb[0] * 100}%, #{rgb[1] * 100}%, #{rgb[2] * 100}%)"
 
         return
 
       redrawSld = ->
         # redraw the slider pointer. X will always be 0, Y will always be a percentage of the HSV 'Value' value.
-        $SS.jscolor.picker.sldM.style.backgroundPosition =
+        SS.jscolor.picker.sldM.style.backgroundPosition =
           "0 #{6 + Math.round (1 - THIS.hsv[2]) * 100}px"
 
       isPickerOwner = ->
-        return $SS.jscolor.picker and $SS.jscolor.picker.owner is THIS
+        return SS.jscolor.picker and SS.jscolor.picker.owner is THIS
 
       blurTarget = ->
         if valueElement is target
@@ -2369,7 +2369,7 @@ SS =
           THIS.importColor()
 
       setPad = (e) ->
-        mpos = $SS.jscolor.getRelMousePos e
+        mpos = SS.jscolor.getRelMousePos e
         x = mpos.x - 11
         y = mpos.y - 11
         THIS.fromHSV(
@@ -2380,7 +2380,7 @@ SS =
         )
 
       setSld = (e) ->
-        mpos = $SS.jscolor.getRelMousePos e
+        mpos = SS.jscolor.getRelMousePos e
         y = mpos.y - 9
         THIS.fromHSV(
           null
@@ -2390,8 +2390,8 @@ SS =
         )
 
       THIS = @
-      valueElement = $SS.jscolor.fetchElement @valueElement
-      styleElement = $SS.jscolor.fetchElement @styleElement
+      valueElement = SS.jscolor.fetchElement @valueElement
+      styleElement = SS.jscolor.fetchElement @styleElement
       leaveValue = 1 << 0
       leaveStyle = 1 << 1
       leavePad = 1 << 2
@@ -2463,7 +2463,7 @@ SS =
       get: ->
         return (if @img
           "url('#{
-            if $SS.validBase64 @img
+            if SS.validBase64 @img
               'data:image/' + SS.typeofBase64(@img) + ';base64,' + @img
             else
               @img
@@ -2477,10 +2477,10 @@ SS =
           @hidden = true
           return
         else
-          mascot = $SS.conf["Mascots"][index]
+          mascot = SS.conf["Mascots"][index]
 
         @index    = index;
-        @hidden   = $SS.conf["Hidden Mascots"].indexOf(index) isnt -1
+        @hidden   = SS.conf["Hidden Mascots"].indexOf(index) isnt -1
         @default  = mascot.default;
         @position = mascot.position;
         @overflow = mascot.overflow;
@@ -2489,7 +2489,7 @@ SS =
         @img      = new SS.Image mascot.img,
           "no-repeat " + (
             if @overflow
-              $SS.conf["Sidebar Position " + (
+              SS.conf["Sidebar Position " + (
                 if SS.conf["Sidebar Position String"] is "left" and @flip
                   "o"
                 else
@@ -2500,7 +2500,7 @@ SS =
         @bOffset  = typeof mascot.offset is "number"
         @offset   = if @bOffset then mascot.offset else if SS.conf["Post Form"] isnt 1 then 273 else 23
         @boards   = mascot.boards
-        @enabled  = $SS.conf["Selected Mascots"] is 0 or not SS.conf["Selected Mascots"].indexOf(index) is -1
+        @enabled  = SS.conf["Selected Mascots"] is 0 or not SS.conf["Selected Mascots"].indexOf(index) is -1
 
       preview: ->
         div = $([
@@ -2517,13 +2517,13 @@ SS =
 
         $("a[title=Edit]", div).bind "click", (e) ->
           e.stopPropagation()
-          $SS.options.showMascot index
+          SS.options.showMascot index
 
         div
 
     Theme: class
       constructor: (index) ->
-        return @hidden = true unless (theme = $SS.conf["Themes"][index])?
+        return @hidden = true unless (theme = SS.conf["Themes"][index])?
 
         @index       = index
         @hidden      = SS.conf["Hidden Themes"].indexOf(index) isnt -1
@@ -2599,7 +2599,7 @@ SS =
         @customCSS = ""
 
       preview: ->
-        sTheme = if SS.conf["SFW/NSFW Themes"] and SS.location.nsfw then $SS.conf["NSFW Theme"] else $SS.conf["Selected Theme"]
+        sTheme = if SS.conf["SFW/NSFW Themes"] and SS.location.nsfw then SS.conf["NSFW Theme"] else SS.conf["Selected Theme"]
         div = $([
           "<div "
           if @hidden then "hidden=true " else ""

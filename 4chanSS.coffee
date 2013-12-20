@@ -1793,7 +1793,7 @@ SS =
           $SS.conf["NSFW Theme"]
         else
           $SS.conf["Selected Theme"]
-        
+
         tIndex = if $SS.conf["Themes"][i] then i else 0
 
         $SS.theme = new $SS.Theme tIndex # Set the active theme.
@@ -1809,11 +1809,11 @@ SS =
         # Erio
         img: "http://i.imgur.com/zhPlM.png"
         "default": true
-      },{ 
+      },{
         # Homu
         img: "http://i.imgur.com/b9KmB.png"
         "default": true
-      },{ 
+      },{
         # Horo
         img: "http://i.imgur.com/bsLY4.png"
         offset: 0
@@ -1908,7 +1908,7 @@ SS =
       },{
         # Yozora
         img: "http://i.imgur.com/xwPrX.png"
-        "default": true 
+        "default": true
       },{
         # Yuzuki
         img: "http://i.imgur.com/c8Lal.png"
@@ -1953,13 +1953,13 @@ SS =
           pages.each ->
             select.append $(
               "<option value=" + @textContent.toLowerCase() + (
-                if cpage is @textContent 
+                if cpage is @textContent
                   " selected=true"
                 else
                   ""
               ) + ">Page " + @textContent
             )
-            
+
           select.bind "change", -> location.href = location.href.replace /(\.org\/[^\/]+)\/?.*$/, "$1/" + @value
 
           $("#boardNavDesktop").prepend select
@@ -1984,7 +1984,7 @@ SS =
         check = /^.*##?.+/.test(that.val())
 
         if check and not that.hasClass "tripping"
-          that.addClass "tripping" 
+          that.addClass "tripping"
         else if not check and that.hasClass "tripping"
           that.removeClass "tripping"
 
@@ -2435,7 +2435,7 @@ SS =
         @isLight     = SS.isLight @private_rgb
         @rgb         = @private_rgb.join ","
         @hover       = @shiftRGB 16, true
-        
+
       calc_rgb: ->
         hex = parseInt @hex, 16
         return [ # 0xRRGGBB to [R, G, B]
@@ -2443,7 +2443,7 @@ SS =
           (hex >> 8) & 0xFF
           hex & 0xFF
         ]
-      
+
       shiftRGB: (shift, smart) ->
         minmax = (base) -> if base < 0 then 0 else if base > 255 then 255 else base
 
@@ -2455,7 +2455,7 @@ SS =
 
         return (minmax color + shift for color in rgb).join ","
 
-    Image: class 
+    Image: class
       constructor: (img, RPA) ->
         @img = img
         @RPA = RPA
@@ -2514,7 +2514,7 @@ SS =
         $("a[title=Delete]", div).bind "click", (e) ->
           e.stopPropagation()
           SS.options.deleteMascot index
-        
+
         $("a[title=Edit]", div).bind "click", (e) ->
           e.stopPropagation()
           $SS.options.showMascot index
@@ -2562,7 +2562,7 @@ SS =
         "<path fill='rgb(", color, ")' d='", coords, "'/>"
         "</svg>"
       ].join ""
-      
+
       @icons =
         closeButton:  svg @sageColor.rgb,                'M24.778,21.419 19.276,15.917 24.777,10.415 21.949,7.585 16.447,13.087 10.945,7.585 8.117,10.415 13.618,15.917 8.116,21.419 10.946,24.248 16.447,18.746 21.948,24.248z'
         closedThread: svg @sageColor.rgb,                'M22.335,12.833V9.999h-0.001C22.333,6.501,19.498,3.666,16,3.666S9.666,6.502,9.666,10h0v2.833H7.375V25h17.25V12.833H22.335zM11.667,10C11.667,10,11.667,10,11.667,10c0-2.39,1.944-4.334,4.333-4.334c2.391,0,4.335,1.944,4.335,4.333c0,0,0,0,0,0v2.834h-8.668V10z'

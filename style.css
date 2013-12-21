@@ -209,6 +209,7 @@ span[style='color:#FF0000;font-weight:normal'] {
     color:" + SS.theme.sageColor.hex + "!important;
     text-shadow:none!important;
 }
+.dialog,
 .reply,
 .hidden_thread,
 .panel,
@@ -652,6 +653,9 @@ body::before,
 " + (if SS.conf["Navigation Bar Position"] is 1 then "#boardNavDesktop," else "") + "
 #imgControls {
     border-bottom:1px solid " + SS.theme.brderColor.hex + "!important;
+}
+.dialog {
+    border-color: " + SS.theme.brderColor.hex + "!important;
 }
 " + (if SS.conf["Sidebar Position"] <= 3 then "#imgControls," else "") + "
 .deleteform {
@@ -1212,6 +1216,7 @@ button,
 input:not([type=checkbox]):not([type=radio]),
 select,
 #qr>form>.captchaimg>img,
+#qr .field,
 .riceFile {
     border:1px solid " + SS.theme.inputbColor.hex + "!important;
 }
@@ -1225,6 +1230,7 @@ input.field,
 select,
 textarea,
 .riceFile,
+#qr .field,
 #options input {
     background:rgba(" + SS.theme.inputColor.rgb + ",.9)!important;
 }
@@ -2250,7 +2256,6 @@ body>.closed {
     right:5px!important;
     top:0;
 }
-" + (unless SS.conf["Custom Navigation Links"] then "
 #navtop {
     bottom:0;
     display:inline-block!important;
@@ -2285,7 +2290,7 @@ body>.closed {
     display:inline!important;
     line-height:20px;
 }
-" else "") + (if SS.conf["Pages Position"] isnt 4 then (if SS.conf["Pages Position"] is 1 then "
+" + (if SS.conf["Pages Position"] isnt 4 then (if SS.conf["Pages Position"] is 1 then "
 select#pagesDrop {
     left:0;
     position:absolute;
@@ -2426,6 +2431,14 @@ a[href='.././'] {
     z-index:5!important;
     width:261px!important;") + "
 }
+#file-n-submit {
+    height: auto !important;
+}
+#qr-filename-container {
+    width: 100% !important;
+    max-width: 100% !important;
+    min-width: 0 !important;
+}
 #qr.autohide {
     " + (if SS.conf["Post Form"] is 1 then "
     bottom:-249px!important;
@@ -2534,15 +2547,6 @@ a[href='.././'] {
     height:22px!important;
     width:25px!important;
 }
-#qr>form>div:first-child .field:not(#dump) {
-    float:left;
-    height:22px;
-    margin-left:1px!important;
-    padding:3px 4px!important;
-    width:76px!important;
-    min-width:76px!important;
-    max-width:76px!important;
-}
 #qr>form>div:first-child .field:not(#dump)+span {
     color:rgba(" + SS.theme.textColor.rgb + ",0)!important;
     font-size:0!important;
@@ -2562,6 +2566,7 @@ a[href='.././'] {
 }
 #qr>form .field,
 #qr>form>.captchaimg {
+    margin-top:0!important;
     margin-bottom:1px!important;
 }
 #qr>form>.captchaimg {
@@ -2621,7 +2626,6 @@ a[href='.././'] {
     bottom:-333px!important;
 }" else "") + "
 #qr:not(.captcha)>form input[type=submit] {
-    margin-top:1px!important;
     width:100%!important;
 }
 #qr:not(.captcha) #replies+div {
@@ -2736,22 +2740,11 @@ pre.prettyprint {
 .field:focus::-moz-placeholder {
     color:transparent!important;
 }
-#qr>form>div:first-child .field:not(#dump):focus {
-    background:rgba(" + SS.theme.inputColor.hover + ",.98)!important;
-    left:24px!important;
-    position:absolute;
-    width:230px!important;
-    min-width:230px!important;
-    max-width:230px!important;
-    z-index:2;
-}
 #qr>form>div:first-child .field:not(#dump):focus+span {
     color:rgba(" + SS.theme.textColor.rgb + ",.4)!important;
-    right:6px;
-    z-index:3;
-    -webkit-transition:right .3s ease-in-out,color .3s ease-in-out;
-    -moz-transition:right .3s ease-in-out,color .3s ease-in-out;
-    -o-transition:right .3s ease-in-out,color .3s ease-in-out;
+    -webkit-transition:color .3s ease-in-out;
+    -moz-transition:color .3s ease-in-out;
+    -o-transition:color .3s ease-in-out;
 }
 #qr textarea:focus,
 #qr>form>div:first-child .field:not(#dump):focus {
@@ -2765,7 +2758,7 @@ pre.prettyprint {
 }
 #qr textarea {
     height:100%;
-    position:absolute;
+    float: #{SS.conf["Sidebar Position String"]};
 }
 #qr textarea:focus {
     width:415px!important;

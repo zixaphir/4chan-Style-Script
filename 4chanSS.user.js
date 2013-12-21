@@ -342,7 +342,7 @@
     };
 
     $.prototype.init = function(selector, root) {
-      var atRegEx, attribs, el, tag, tagCheck, val;
+      var atRegEx, attribs, el, tag, tagCheck, val, _ref;
       if (selector == null) {
         return this;
       }
@@ -356,15 +356,15 @@
           tag = d.createElement(tagCheck[1]);
           if (tagCheck[2]) {
             atRegEx = /(\w+)=((?:"(?:[^"]+)"|'(?:[^']+)'|(?:\w+)))/g;
-            while ((attribs = atRegEx.exec(tagCheck[2])) == null) {
+            while ((attribs = atRegEx.exec(tagCheck[2])) != null) {
               val = attribs[2];
-              if ((val[0] === '"' || val[0] === "'") && val[0] === val[val.length - 1]) {
+              if (((_ref = val[0]) === '"' || _ref === "'") && val[0] === val[val.length - 1]) {
                 val = val.substr(1, val.length - 2);
               }
               tag.setAttribute(attribs[1], val);
             }
           }
-          tag.innerHTML = tagCheck[2];
+          tag.innerHTML = tagCheck[3];
           this.elems = [tag];
         } else if (/^#[A-Za-z][\w\-.:]+$/.test(selector) && root === d) {
           if ((el = root.getElementById(selector.substr(1))) != null) {

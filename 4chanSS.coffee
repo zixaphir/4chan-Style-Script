@@ -269,14 +269,14 @@ class $
 
         if tagCheck[2]
           atRegEx = /(\w+)=((?:"(?:[^"]+)"|'(?:[^']+)'|(?:\w+)))/g
-          while not (attribs = atRegEx.exec tagCheck[2])?
+          while (attribs = atRegEx.exec tagCheck[2])?
             val = attribs[2]
-            if (val[0] is '"' or val[0] is "'") and val[0] is val[val.length-1]
-              val = val.substr 1, val.length-2
+            if (val[0] in ['"', "'"]) and val[0] is val[val.length-1]
+              val = val.substr 1, val.length - 2
 
             tag.setAttribute attribs[1], val
 
-        tag.innerHTML = tagCheck[2]
+        tag.innerHTML = tagCheck[3]
         @elems = [ tag ]
 
       else if /^#[A-Za-z][\w\-.:]+$/.test(selector) and root is d

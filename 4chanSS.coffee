@@ -7,7 +7,7 @@ defaultConfig =
   'Show Text Board': [
     true
     "Toggle visibility of the text board link"
-  ],
+  ]
   "Show Logo": [
     true
     "Toggle visibility of the logo"
@@ -100,7 +100,7 @@ defaultConfig =
   ]
   "Side Margin": [
     5
-    "Change the size of the margin opposite of the sidebar",
+    "Change the size of the margin opposite of the sidebar"
     [
       { name: "Large",  value: 65 }
       { name: "Medium", value: 25 }
@@ -110,14 +110,14 @@ defaultConfig =
   ]
   "Layout": [
     1
-    "Change the layout of the main content",
+    "Change the layout of the main content"
     [
       { name: "Fit Width",   value: 1 }
       { name: "Fit Content", value: 2 }
       { name: "Centered",    value: 3 }
     ]
     true
-  ],
+  ]
   "Navigation Bar Position": [
     2
     "Sets the position of the navigation bar"
@@ -204,7 +204,7 @@ defaultConfig =
 MAX_FONT_SIZE = 18
 MIN_FONT_SIZE = 8
 NAMESPACE     = "4chanSS."
-VERSION       = "3.0.12"
+VERSION       = "<%= version %>"
 inputImages   = "iVBORw0KGgoAAAANSUhEUgAAAAgAAAAgCAYAAAAv8DnQAAAAGXRFWHRTb2Z0d2FyZQBBZG9iZSBJbWFnZVJlYWR5ccllPAAAAP9JREFUOMvV0CFLQ2EYxfHfrtdiURgbmCxOmFPBJgZZ0CQD0Q+goFkwabWIyWIWFgwmy7Qp7DPI3GD7ACZlYLNcy31ljG0aDHrSy3N43nOef6ZULBiifczEQ8wV7OAtGmBO4wgfOI2whsXUnMAJ8rhCJ8IxDpHDHpZwixqM5XPZBBtYxioauEgjRLjBI2bRxTneQ6EYCS4xiTu89DbONJrtP88hwnV64hm28YRqyPsFDkmSGKUYFubnsqignM7rqDWa7dcAqoLdnsXwrgZQ5QG/l8MVIxX1ZPar/lUyUOsv+aMzv+0Qw3OrM4VNrKfzB9yXioVu6LDVx+EA4/+Gwycw/Uz36O07WwAAAABJRU5ErkJggg=="
 fontListSWF   = "http://ahodesuka.github.com/FontList.swf"
 themeInputs   = [
@@ -630,7 +630,7 @@ SS =
 
     SS.bHideSidebar = SS.location.sub isnt "boards" or SS.location.catalog or SS.location.board is "f"
 
-    css = <%= grunt.file.read("style.css") %>
+    css = <%= grunt.file.read("style.css").replace(/\s+/g, ' ').trim() %>
 
     if reload
       $("#ch4SS").text css
@@ -641,7 +641,7 @@ SS =
     if SS.location.sub is "sys" # fix for firefux on report popups.
       d.head.innerHTML = d.head.innerHTML
 
-    unless reload
+    if reload isnt true
       MutationObserver = window.MutationObserver or window.WebKitMutationObserver
       SS.options.init()
 
@@ -738,10 +738,19 @@ SS =
 
   # OPTIONS
   options:
-    saveAndClose: true,
+    saveAndClose: true
     init: ->
-      a = $("<a id=themeoptionsLink title='4chan SS Options'>SS").bind("click", SS.options.show)
-      $("#navtopright>a:last-child").replace(a)
+      fn = ->
+        $(d).unbind '4chanXInitFinished', fn
+        d.dispatchEvent new CustomEvent 'AddMenuEntry', detail: 
+          el:    $('<span>').append($("<a id=themeoptionsLink title='4chan SS Options'>Style Script").bind "click", SS.options.show).elems[0]
+          type:  'header'
+          order: 999
+      
+      if $("#header-bar").exists()
+        fn()
+      else
+        $(d).bind '4chanXInitFinished', fn
 
     show: ->
       if $("#overlay").exists()
@@ -767,27 +776,27 @@ SS =
             .bind("dragend",   (e) -> $(@parentNode).delay (-> $(@).removeClass "moving"), 1)
             .bind("dragenter", (e) -> $(@parentNode).addClass    "over")
             .bind("dragleave", (e) -> $(@parentNode).removeClass "over")
-        $(el)
-          .bind("drop", (e) ->
-            node = $ "#tNavLinks>##{e.dataTransfer.getData('text/plain')}"
+          $(el)
+            .bind("drop", (e) ->
+              node = $ "#tNavLinks>##{e.dataTransfer.getData('text/plain')}"
 
-            if e.dataTransfer.getData("text/plain") isnt @id
+              if e.dataTransfer.getData("text/plain") isnt @id
 
-              if $(@).nextSibling(node).exists()
-                $(@).before(node)
-              else
-                $(@).after(node)
+                if $(@).nextSibling(node).exists()
+                  $(@).before(node)
+                else
+                  $(@).after(node)
 
-            $(@).removeClass "over"
-            e.preventDefault())
-          .bind "dragover", (e) ->
-            e.preventDefault()
-            e.dataTransfer.dropEffect = "move"
+              $(@).removeClass "over"
+              e.preventDefault())
+            .bind "dragover", (e) ->
+              e.preventDefault()
+              e.dataTransfer.dropEffect = "move"
 
-        $("a[name=delLink]", el).bind("click", -> $(@).parent().remove())
+          $("a[name=delLink]", el).bind("click", -> $(@).parent().remove())
 
       for key of defaultConfig
-        continue if (key is "Style Scrollbars" and !SS.browser.webkit) or
+        continue if (key is "Style Scrollbars" and not SS.browser.webkit) or
                  key is "Nav Link Delimiter" or
                  /^(Selected|Hidden)+\s(Mascots|Themes?)+$/.test key
 
@@ -807,7 +816,7 @@ SS =
           opts   = if key is "Font" then SS.fontList or defaultConfig[key][2] else defaultConfig[key][2]
           cFonts = []
           Array::push.apply optionsHTML, [
-            "<span class=mOption title=\"#{des}\"><span>E{keyE}</span>"
+            "<span class=mOption title=\"#{des}\"><span>#{key}</span>"
             "<select name='#{key}'#{if defaultConfig[key][3] is true then ' hasSub' else ''}>"
           ]
 
@@ -853,7 +862,7 @@ SS =
 
 
           if links?
-            for {link, text} in links
+            for {link, text}, i in links
               Array::push.apply optionsHTML, [
                 "<div id=navlink" + i + " class=navlink><label>Text: <input type=text value='" + text + "'></label>"
                 "<label>Link: <input type=text value='" + link + "'></label>"
@@ -974,803 +983,799 @@ SS =
         themes.append (new SS.Theme i++).preview()
       return
 
-  createMascotsTab: (tOptions) ->
-    mascots = $("#tMascot", tOptions).html ""
-    p       = $ "<p>"
-
-    p.append $("<a class=trbtn name=addMascot>add", tOptions).bind("click", SS.options.showMascot)
-    p.append $("<a class=trbtn name=restoreMascots title='Restore hidden default mascots'>restore", tOptions)
-      .bind "click", ->
-        SS.conf["Hidden Mascots"] = []
-        $("#tMascot>div[hidden]").show()
-
-    $("a[name=restoreMascots]", p).hide() if SS.conf["Hidden Mascots"].length is 0
-
-    p.append$("<a class=trbtn name=selectAll>select all", tOptions)
-      .bind "click", -> $("#tMascot>div:not([hidden])").each -> $(@).addClass "selected"
-    p.append $("<a class=trbtn name=selectNone>select none", tOptions)
-      .bind "click", -> $("#tMascot>div").each -> $(@).removeClass "selected"
-
-    mascots.append p
-
-    max = SS.conf["Mascots"].length
-    i   = i
-
-    while i < max
-      mascots.append((new SS.Mascot(i++)).preview())
-
-  close: ->
-    $(d).unbind("keydown", SS.options.keydown)
-        .unbind("keyup", SS.options.keydown)
-
-    return $("#overlay").remove()
-
-  keydown: (e) ->
-    if e.keyCode >= 16 and e.keyCode <= 18
-      SS.options.saveAndClose = false
-      $("a[name=save]").text("apply")
-
-  keyup: (e) ->
-    unless SS.options.saveAndClose
-      SS.options.saveAndClose = true
-      $("a[name=save]").text("save")
-
-  loadSystemFonts: (e) ->
-    loadFontBTN    = $ e.target
-    getFontMessage = (e) ->
-      SS.fontList = e.data
-      fontSelect  = $("<select name=Font>")
-
-      for {name, value} in SS.fontList
-        fontSelect.append($(
-          "<option" + " style=\"font-family:" + SS.formatFont(value) + "!important\"" +
-          " value='" + value + "'" + (if value is SS.conf["Font"] then " selected=true" else "") + ">" + name
-        ))
-
-        $("select[name=Font]").before(fontSelect).remove()
-        $("#fontListSWF").remove()
-        window.removeEventListener("message", getFontMessage)
-        loadFontBTN.text("System Fonts Loaded!").unbind("click", SS.options.loadSystemFonts)
-
-    $(d.head).append($("""
-<script type="text/javascript">
-  function populateFontList(fontArr) {
-    var fontList = []
-    for (var key in fontArr)
-      fontList.push(fontArr[key])
-      window.postMessage(fontList, '*')
-    }
-</script>
-"""))
-
-    window.addEventListener "message", getFontMessage, false
-
-    $(d.body).append($(
-      "<div id=fontListSWF hidden><object type='application/x-shockwave-flash'" +
-      " data='" + fontListSWF + "'><param name=allowScriptAccess value=always></object>"
-    ))
-    loadFontBTN.text "Loading..."
-
-  save: ->
-    div        = $("#themeoptions")
-    themes     = []
-    mascots    = []
-    links      = []
-    selMascots = []
-
-    # Save main
-    $("#themeoptions input[name]:not([name=toTab]), #themeoptions select").each ->
-      name = $(@).attr("name")
-      val  = $(@).val()
-
-      if name is "Font Size"
-        val = parseInt val
-
-        unless $("input[name='Bitmap Font']", div).val()
-          # 4chan SS originally used Math.max and Math.min here.
-          # Don't do that.
-          val = if val > MAX_FONT_SIZE
-            MAX_FONT_SIZE
-          else if val < MIN_FONT_SIZE
-            MIN_FONT_SIZE
-          else val
-
-        else if name is "Nav Link Delimiter"
-          val = val.replace /\s/g, "&nbsp;"
-
-        SS.Config.set $(@).attr("name"), val
-
-    # Save Themes
-    $("#themeoptions #tThemes>div").each (index) ->
-      oldIndex = parseInt @id.substr(5)
-      themes.push SS.conf["Themes"][oldIndex] unless SS.conf["Themes"][oldIndex].default
-
-      selTheme = if selTheme = $("#themeoptions #tThemes>div.selected").exists()
-        parseInt selTheme.attr("id").substr 5
-      else
-        0
-
-    SS.Config.set "Themes", themes
-    SS.Config.set (
-      if SS.conf["SFW/NSFW Themes"] and SS.location.nsfw
-        "NSFW Theme"
-      else
-        "Selected Theme"
-    ), selTheme
-
-    SS.Config.set "Hidden Themes", SS.conf["Hidden Themes"]
-
-    # Save Mascots
-    $("#themeoptions #tMascot>div").each (index) ->
-      oldIndex = parseInt @id.substr 6
-      selMascots.push index if $(@).hasClass "selected"
-
-      mascots.push SS.conf["Mascots"][oldIndex] unlessSS.conf["Mascots"][oldIndex].default
-
-      SS.Config.set "Mascots", mascots
-      SS.Config.set "Selected Mascots", selMascots
-      SS.Config.set "Hidden Mascots", SS.conf["Hidden Mascots"]
-
-      # Save nav links
-      $("#themeoptions #tNavLinks>.navlink").each ->
-        nLink = {}
-
-        $(@).children("input").each (index) ->
-          if index is 0
-            nLink.text = $(@).val()
-          else if index is 1
-            nLink.link = $(@).val()
-
-        links.push nLink if nLink.text isnt "" and nLink.link isnt ""
-
-      SS.Config.set "Nav Links", links
-
-      SS.options.close() if SS.options.saveAndClose
-
-      SS.init true
-
-  showTheme: (tIndex) ->
-    if typeof tIndex is "number"
-      bEdit  = true
-      tEdit  = SS.conf["Themes"][tIndex]
-
-      if (tEdit.bgImg and tEdit.bgRPA)
-        RPA     = tEdit.bgRPA.split(" ")
-        themeR  = RPA[0]
-        themePY = RPA[1]
-        themePX = RPA[2]
-        themeA  = RPA[3]
-
+    createMascotsTab: (tOptions) ->
+      mascots = $("#tMascot", tOptions).html ""
+      p       = $ "<p>"
+  
+      p.append $("<a class=trbtn name=addMascot>add", tOptions).bind("click", SS.options.showMascot)
+      p.append $("<a class=trbtn name=restoreMascots title='Restore hidden default mascots'>restore", tOptions)
+        .bind "click", ->
+          SS.conf["Hidden Mascots"] = []
+          $("#tMascot>div[hidden]").show()
+  
+      $("a[name=restoreMascots]", p).hide() if SS.conf["Hidden Mascots"].length is 0
+  
+      p.append $("<a class=trbtn name=selectAll>select all", tOptions)
+        .bind "click", -> $("#tMascot>div:not([hidden])").each -> $(@).addClass "selected"
+      p.append $("<a class=trbtn name=selectNone>select none", tOptions)
+        .bind "click", -> $("#tMascot>div").each -> $(@).removeClass "selected"
+  
+      mascots.append p
+  
+      max = SS.conf["Mascots"].length
+      i   = i
+  
+      while i < max
+        mascots.append((new SS.Mascot(i++)).preview())
+  
+    close: ->
+      $(d).unbind("keydown", SS.options.keydown)
+          .unbind("keyup", SS.options.keydown)
+  
+      return $("#overlay").remove()
+  
+    keydown: (e) ->
+      if e.keyCode >= 16 and e.keyCode <= 18
+        SS.options.saveAndClose = false
+        $("a[name=save]").text("apply")
+  
+    keyup: (e) ->
+      unless SS.options.saveAndClose
+        SS.options.saveAndClose = true
+        $("a[name=save]").text("save")
+  
+    loadSystemFonts: (e) ->
+      loadFontBTN    = $ e.target
+      getFontMessage = (e) ->
+        SS.fontList = e.data
+        fontSelect  = $("<select name=Font>")
+  
+        for {name, value} in SS.fontList
+          fontSelect.append($(
+            "<option" + " style=\"font-family:" + SS.formatFont(value) + "!important\"" +
+            " value='" + value + "'" + (if value is SS.conf["Font"] then " selected=true" else "") + ">" + name
+          ))
+  
+          $("select[name=Font]").before(fontSelect).remove()
+          $("#fontListSWF").remove()
+          window.removeEventListener("message", getFontMessage)
+          loadFontBTN.text("System Fonts Loaded!").unbind("click", SS.options.loadSystemFonts)
+  
+      $(d.head).append($("""
+  <script type="text/javascript">
+    function populateFontList(fontArr) {
+      var fontList = []
+      for (var key in fontArr)
+        fontList.push(fontArr[key])
+        window.postMessage(fontList, '*')
+      }
+  </script>
+  """))
+  
+      window.addEventListener "message", getFontMessage, false
+  
+      $(d.body).append($(
+        "<div id=fontListSWF hidden><object type='application/x-shockwave-flash'" +
+        " data='" + fontListSWF + "'><param name=allowScriptAccess value=always></object>"
+      ))
+      loadFontBTN.text "Loading..."
+  
+    save: ->
+      div        = $("#themeoptions")
+      themes     = []
+      mascots    = []
+      links      = []
+      selMascots = []
+  
+      # Save main
+      $("#themeoptions input[name]:not([name=toTab]), #themeoptions select").each ->
+        name = $(@).attr("name")
+        val  = $(@).val()
+  
+        if name is "Font Size"
+          val = parseInt val
+  
+          unless $("input[name='Bitmap Font']", div).val()
+            # 4chan SS originally used Math.max and Math.min here.
+            # Don't do that.
+            val = if val > MAX_FONT_SIZE
+              MAX_FONT_SIZE
+            else if val < MIN_FONT_SIZE
+              MIN_FONT_SIZE
+            else val
+  
+          else if name is "Nav Link Delimiter"
+            val = val.replace /\s/g, "&nbsp;"
+  
+          SS.Config.set $(@).attr("name"), val
+  
+      # Save Themes
+      $("#themeoptions #tThemes>div").each (index) ->
+        oldIndex = parseInt @id.substr(5)
+        themes.push SS.conf["Themes"][oldIndex] unless SS.conf["Themes"][oldIndex].default
+  
+        selTheme = if selTheme = $("#themeoptions #tThemes>div.selected").exists()
+          parseInt selTheme.attr("id").substr 5
+        else
+          0
+  
+      SS.Config.set "Themes", themes
+      SS.Config.set (
+        if SS.conf["SFW/NSFW Themes"] and SS.location.nsfw
+          "NSFW Theme"
+        else
+          "Selected Theme"
+      ), selTheme
+  
+      SS.Config.set "Hidden Themes", SS.conf["Hidden Themes"]
+  
+      # Save Mascots
+      $("#themeoptions #tMascot>div").each (index) ->
+        oldIndex = parseInt @id.substr 6
+        selMascots.push index if $(@).hasClass "selected"
+  
+        mascots.push SS.conf["Mascots"][oldIndex] unlessSS.conf["Mascots"][oldIndex].default
+  
+        SS.Config.set "Mascots", mascots
+        SS.Config.set "Selected Mascots", selMascots
+        SS.Config.set "Hidden Mascots", SS.conf["Hidden Mascots"]
+  
+        # Save nav links
+        $("#themeoptions #tNavLinks>.navlink").each ->
+          nLink = {}
+  
+          $(@).children("input").each (index) ->
+            if index is 0
+              nLink.text = $(@).val()
+            else if index is 1
+              nLink.link = $(@).val()
+  
+          links.push nLink if nLink.text isnt "" and nLink.link isnt ""
+  
+        SS.Config.set "Nav Links", links
+  
+        SS.options.close() if SS.options.saveAndClose
+  
+        SS.init true
+  
+    showTheme: (tIndex) ->
+      if typeof tIndex is "number"
+        bEdit  = true
+        tEdit  = SS.conf["Themes"][tIndex]
+  
+        if (tEdit.bgImg and tEdit.bgRPA)
+          [themeR, themePY, themePX, themeA] = tEdit.bgRPA.split(" ")
+  
       div = $("<div id=addTheme>")
-
+  
       check = (test) -> return (if test then " selected" else "")
-
+  
       innerHTML = [
         "<label>"
         "<span>Theme Name:</span><input type=text name=name value='" + (if bEdit then tEdit.name else "") + "'>"
         "</label><label>"
         "<span>BG Image:</span><input type=text name=bgImg value='"
-        (if bEdit then (if SS.validImageURL(tEdit.bgImg) then tEdit.bgImg + "'" else (if SS.validBase64(tEdit.bgImg) then "[Base 64 Encoded Image]' disabled=true" else "'")) else "'")
+        if bEdit then (if SS.validImageURL(tEdit.bgImg) then tEdit.bgImg + "'" else (if SS.validBase64(tEdit.bgImg) then "[Base 64 Encoded Image]' disabled=true" else "'")) else "'"
         "></label><label>"
         "<span>BG Repeat:</span><select name=bgR>"
-        "<option" + (check bEdit and themeR  is "no-repeat") + ">no-repeat</option>"
-        "<option" + (check bEdit and themeR  is "repeat")    + ">repeat</option>"
-        "<option" + (check bEdit and themeR  is "repeat-x")  + ">repeat-x</option>"
-        "<option" + (check bEdit and themeR  is "repeat-y")  + ">repeat-y</option>"
+        "<option#{check bEdit and themeR  is "no-repeat"}>no-repeat</option>"
+        "<option#{check bEdit and themeR  is "repeat"   }>repeat</option>"
+        "<option#{check bEdit and themeR  is "repeat-x" }>repeat-x</option>"
+        "<option#{check bEdit and themeR  is "repeat-y" }>repeat-y</option>"
         "</select></label><label>"
         "<span>BG Attachment:</span><select name=bgA>"
-        "<option" + (check bEdit and themeA  is "fixed")     + ">fixed</option>"
-        "<option" + (check bEdit and themeA  is "scroll")    + ">scroll</option>"
+        "<option#{check bEdit and themeA  is "fixed"    }>fixed</option>"
+        "<option#{check bEdit and themeA  is "scroll"   }>scroll</option>"
         "</select></label><label>"
         "<span>BG Position-X:</span><select name=bgPX>"
-        "<option" + (check bEdit and themePX is "left")      + ">left</option>"
-        "<option" + (check bEdit and themePX is "center")    + ">center</option>"
-        "<option" + (check bEdit and themePX is "right")     + ">right</option>"
+        "<option#{check bEdit and themePX is "left"     }>left</option>"
+        "<option#{check bEdit and themePX is "center"   }>center</option>"
+        "<option#{check bEdit and themePX is "right"    }>right</option>"
         "</select></label><label>"
         "<span>BG Position-Y:</span><select name=bgPY>"
-        "<option" + (check bEdit and themePY is "top")       + ">top</option>"
-        "<option" + (check bEdit and themePY is "center")    + ">center</option>"
-        "<option" + (check bEdit and themePY is "bottom")    + ">bottom</option>"
+        "<option#{check bEdit and themePY is "top"      }>top</option>"
+        "<option#{check bEdit and themePY is "center"   }>center</option>"
+        "<option#{check bEdit and themePY is "bottom"   }>bottom</option>"
         "</select></label>"
       ]
-
+  
       for {name, dName} in themeInputs
         Array::push.apply innerHTML, [
           "<label><span>" + dName + ":</span>"
           "<input type=text class=jsColor name=" + name + " value=" + (if bEdit then tEdit[name] else "") + "></label>"
         ]
-
-    Array::push.apply innerHTML, [
-      "<label id=customCSS><span>Custom CSS:</span><textarea name=customCSS>" + (if bEdit then tEdit.customCSS or "" else "") + "</textarea>"
-      "</label><div><div id=selectImage><input type=file riced=true accept='image/GIF,image/JPEG,image/PNG'>"
-      "<span class=trbtn>Select Image</span></div>"
-      if bEdit and SS.validBase64(tEdit.bgImg) then "<input type=hidden name=customIMGB64 value='" + tEdit.bgImg + "'>" else ""
-      "<a class=trbtn name=clearIMG>Clear Image</a>"
-      "<a class=trbtn name=export>Export</a>"
-      "<a class=trbtn name=" + (if bEdit then "edit" else "add") + ">" + (if bEdit then "edit" else "add") + "</a><a class=trbtn name=cancel>cancel</a></div>"
-    ]
-
-    div.html innerHTML.join ""
-    $(".jsColor", div).jsColor()
-
-    overlay = $("<div id=overlay2>").append div
-
-    $("#selectImage>input[type=file]", div).bind "change", SS.options.SelectImage
-    $("a[name=clearIMG]", div).bind "click", SS.options.ClearImage
-
-    $("a[name=export]", div).bind "click", ->
-      theme = SS.options.addTheme tIndex, true
-      window.open ("data:application/json," + encodeURIComponent JSON.stringify theme), "Export " + theme.name
-
-    if (bEdit)
-      $("a[name=edit]", div).bind "click", -> SS.options.addTheme tIndex
-    else
-      $("a[name=add]", div).bind "click", SS.options.addTheme
-
-    $("a[name=cancel]", div).bind "click", -> $("#overlay2").remove()
-
-    if (bEdit)
-      $("input,textarea,select", div).bind "change", tEdit.mHandler = ->
-        tEdit.modified = true
-        $("input,textarea,select", $("#addTheme")).unbind("change", tEdit.mHandler)
-
-    $(d.body).append overlay
-
-  addTheme: (tIndex, exp) ->
-    overlay = $("#overlay2")
-    tTheme  = { }
-    makeRPA = ->
-      RPA = [
-        $("select[name=bgR]",  overlay).val()
-        $("select[name=bgPY]", overlay).val()
-        $("select[name=bgPX]", overlay).val()
-        $("select[name=bgA]",  overlay).val()
-      ].join ' '
-
-    bEdit = typeof tIndex is "number"
-    tEdit = if bEdit then SS.conf["Themes"][tIndex] else null
-    error = false
-    div
-
-    return overlay.remove() if not exp and bEdit and not tEdit.modified
-
-    $("input[type=text],textarea", overlay).each ->
-      if @name is "bgImg"
-        b64 = $ "input[name=customIMGB64]", overlay
-        val = if b64.exists() then decodeURIComponent b64.val() else @value
-
-        unless val is "" and SS.validImageURL(val) and SS.validBase64(val)
-          error = true
-          return alert "Invalid image URL/base64."
-
-        val = SS.cleanBase64(val)
-
-      else if @name is "name"
-        val = @value
-        val += " [Modded]" if bEdit and tEdit.default and tEdit.name is val
-
-      else
-        val = @value
-
-      tTheme[@name] = val unless val is ""
-
-      return if error
-
-      if (tTheme.bgImg)
-        tTheme.bgRPA = makeRPA()
-
-        return tTheme if exp
-
-        if bEdit and !tEdit.default
-          SS.conf["Themes"][tIndex] = tTheme
-          tTheme = new SS.Theme(tIndex)
-          div    = $("#theme" + tIndex, $("#overlay"))
-          div.replace(tTheme.preview())
-        else
-          tTheme.author = "You"
-          tIndex        = SS.conf["Themes"].push tTheme
-          tTheme        = new SS.Theme --tIndex
-          div           = tTheme.preview()
-
-        $("#overlay #tThemes").append div
-
-        $("#theme" + tIndex, $("#overlay")).fire("click").scrollIntoView(true)
-
-        return overlay.remove()
-
-  deleteTheme: (tIndex) ->
-    if SS.conf["Themes"][tIndex].default and SS.conf["Hidden Themes"].push(tIndex) is 1
-      $("#tThemes a[name=restoreThemes]").show()
-
-    return (if SS.conf["Themes"][tIndex].default
-      $("#theme" + tIndex).removeClass("selected").hide()
-    else
-      $("#theme" + tIndex).remove())
-
-  showMascot: (mIndex) ->
-    if typeof mIndex is "number"
-      bEdit = true
-      mEdit = SS.conf["Mascots"][mIndex]
-
-      selected = (test) -> return (if test then " selected" else "")
-      checked  = (test) -> return (if test then " checked"  else "")
-
-      div = $("<div id=addMascot>").html([
-        "<label><span>Image:</span><input type=text name=customIMG value='"
-        if bEdit then (if SS.validImageURL(mEdit.img) then mEdit.img + "'" else "[Base 64 Encoded Image]' disabled=true") else "'"
-        "></label>"
-        "<label title='Auto goes according to the post forms position' for=null><span>Alignment/Offset:</span>"
-        "<select name=mPosition>"
-        "<option" + ((selected bEdit and !mEdit.position) or !bEdit) + ">Auto</option>"
-        "<option" + (selected bEdit and mEdit.position is "top") + ">Top</option>"
-        "<option" + (selected bEdit and mEdit.position is "center") + ">Center</option>"
-        "<option" + (selected bEdit and mEdit.position is "bottom") + ">Bottom</option>"
-        "</select>"
-        "<input type=text name=mOffset value='" + (if bEdit and mEdit.position then mEdit.offset + "px" else "") + "'></label>"
-        "<label title='Prevent streching with smaller images (Width < 313px)'><span>Prevent stretching:</span>"
-        "<input type=checkbox name=mSmall" + (checked bEdit and mEdit.small) + "></label>"
-        "<label title='Horizontally flip the mascot when sidebar is on the left'><span>Flip with sidebar:</span>"
-        "<input type=checkbox name=mFlip" + (checked not bEdit or (bEdit and (mEdit.flip or not mEdit.flip?))) + "></label>"
-        "<label title='Allows the mascot to be shown outside the sidebar, ignores `Prevent stretching` option'>"
-        "<span>Allow overflow:</span><input type=checkbox name=mOverflow" + (checked bEdit and mEdit.overflow) + "></label>"
-        "<label title='List of boards to display @ mascot on, seperated by commas. Example: a,c,g,v,jp'><span>Boards:</span>"
-        "<input type=text name=mBoards value='" + (if bEdit and mEdit.boards then mEdit.boards else "") + "'></label>"
-        "<div>"
-        "<div id=selectImage><input type=file riced=true accept='image/GIF,image/JPEG,image/PNG'>"
+  
+      Array::push.apply innerHTML, [
+        "<label id=customCSS><span>Custom CSS:</span><textarea name=customCSS>" + (if bEdit then tEdit.customCSS or "" else "") + "</textarea>"
+        "</label><div><div id=selectImage><input type=file riced=true accept='image/GIF,image/JPEG,image/PNG'>"
         "<span class=trbtn>Select Image</span></div>"
-        "" + (if bEdit and SS.validBase64(mEdit.img) then "<input type=hidden name=customIMGB64 value='" + mEdit.img + "'>" else "") + ""
+        if bEdit and SS.validBase64(tEdit.bgImg) then "<input type=hidden name=customIMGB64 value='" + tEdit.bgImg + "'>" else ""
         "<a class=trbtn name=clearIMG>Clear Image</a>"
-        "<a class=trbtn name=" + (if bEdit then "edit" else "add") + ">" + (if bEdit then "edit" else "add") + "</a><a class=trbtn name=cancel>cancel</a></div></div>"
-      ].join "")
-
+        "<a class=trbtn name=export>Export</a>"
+        "<a class=trbtn name=" + (if bEdit then "edit" else "add") + ">" + (if bEdit then "edit" else "add") + "</a><a class=trbtn name=cancel>cancel</a></div>"
+      ]
+  
+      div.html innerHTML.join ""
+      $(".jsColor", div).jsColor()
+  
       overlay = $("<div id=overlay2>").append div
-
+  
       $("#selectImage>input[type=file]", div).bind "change", SS.options.SelectImage
       $("a[name=clearIMG]", div).bind "click", SS.options.ClearImage
-
+  
+      $("a[name=export]", div).bind "click", ->
+        theme = SS.options.addTheme tIndex, true
+        window.open ("data:application/json," + encodeURIComponent JSON.stringify theme), "Export " + theme.name
+  
       if (bEdit)
-        $("a[name=edit]", div).bind "click", -> SS.options.addMascot mIndex
+        $("a[name=edit]", div).bind "click", -> SS.options.addTheme tIndex
       else
-        $("a[name=add]", div).bind "click", SS.options.addMascot
-
+        $("a[name=add]", div).bind "click", SS.options.addTheme
+  
       $("a[name=cancel]", div).bind "click", -> $("#overlay2").remove()
-
+  
+      if (bEdit)
+        $("input,textarea,select", div).bind "change", tEdit.mHandler = ->
+          tEdit.modified = true
+          $("input,textarea,select", $("#addTheme")).unbind("change", tEdit.mHandler)
+  
       $(d.body).append overlay
-
-  addMascot: (mIndex) ->
-    overlay = $ "#overlay2"
-
-    cIMG      = decodeURIComponent $("input[name=customIMGB64]", overlay).val() or $("input[name=customIMG]", overlay).val()
-    cPosition = $("select[name=mPosition]", overlay).val().toLowerCase()
-    cOffset   = parseInt($("input[name=mOffset]", overlay).val()) or 0
-    cSmall    = $("input[name=mSmall]", overlay).val()
-    cFlip     = $("input[name=mFlip]", overlay).val()
-    cOverflow = $("input[name=mOverflow]", overlay).val()
-    cBoards   = $("input[name=mBoards]", overlay).val()
-    bSetPos   = cPosition isnt "auto"
-
-    return alert("Invalid image URL/base64.") unless SS.validImageURL(cIMG) and SS.validBase64(cIMG)
-
-    cIMG     = SS.cleanBase64 cIMG
-    bDefault = SS.conf["Mascots"][mIndex] != undefined and SS.conf["Mascots"][mIndex].default
-
-    if typeof mIndex is "number" and not bDefault
-      SS.conf["Mascots"][mIndex].img      = cIMG
-      SS.conf["Mascots"][mIndex].small    = cSmall
-      SS.conf["Mascots"][mIndex].flip     = cFlip
-      SS.conf["Mascots"][mIndex].overflow = cOverflow
-
-      if cBoards isnt ""
-        SS.conf["Mascots"][mIndex].boards = cBoards
+  
+    addTheme: (tIndex, exp) ->
+      overlay = $("#overlay2")
+      tTheme  = { }
+      makeRPA = ->
+        RPA = [
+          $("select[name=bgR]",  overlay).val()
+          $("select[name=bgPY]", overlay).val()
+          $("select[name=bgPX]", overlay).val()
+          $("select[name=bgA]",  overlay).val()
+        ].join ' '
+  
+      bEdit = typeof tIndex is "number"
+      tEdit = if bEdit then SS.conf["Themes"][tIndex] else null
+      error = false
+      div
+  
+      return overlay.remove() if not exp and bEdit and not tEdit.modified
+  
+      $("input[type=text],textarea", overlay).each ->
+        if @name is "bgImg"
+          b64 = $ "input[name=customIMGB64]", overlay
+          val = if b64.exists() then decodeURIComponent b64.val() else @value
+  
+          unless val is "" and SS.validImageURL(val) and SS.validBase64(val)
+            error = true
+            return alert "Invalid image URL/base64."
+  
+          val = SS.cleanBase64(val)
+  
+        else if @name is "name"
+          val = @value
+          val += " [Modded]" if bEdit and tEdit.default and tEdit.name is val
+  
+        else
+          val = @value
+  
+        tTheme[@name] = val unless val is ""
+  
+        return if error
+  
+        if (tTheme.bgImg)
+          tTheme.bgRPA = makeRPA()
+  
+          return tTheme if exp
+  
+          if bEdit and !tEdit.default
+            SS.conf["Themes"][tIndex] = tTheme
+            tTheme = new SS.Theme(tIndex)
+            div    = $("#theme" + tIndex, $("#overlay"))
+            div.replace(tTheme.preview())
+          else
+            tTheme.author = "You"
+            tIndex        = SS.conf["Themes"].push tTheme
+            tTheme        = new SS.Theme --tIndex
+            div           = tTheme.preview()
+  
+          $("#overlay #tThemes").append div
+  
+          $("#theme" + tIndex, $("#overlay")).fire("click").scrollIntoView(true)
+  
+          return overlay.remove()
+  
+    deleteTheme: (tIndex) ->
+      if SS.conf["Themes"][tIndex].default and SS.conf["Hidden Themes"].push(tIndex) is 1
+        $("#tThemes a[name=restoreThemes]").show()
+  
+      return (if SS.conf["Themes"][tIndex].default
+        $("#theme" + tIndex).removeClass("selected").hide()
       else
-        delete SS.conf["Mascots"][mIndex].boards
-
-      if bSetPos
-        SS.conf["Mascots"][mIndex].position = cPosition
-        SS.conf["Mascots"][mIndex].offset   = cOffset
+        $("#theme" + tIndex).remove())
+  
+    showMascot: (mIndex) ->
+      if typeof mIndex is "number"
+        bEdit = true
+        mEdit = SS.conf["Mascots"][mIndex]
+  
+        selected = (test) -> return (if test then " selected" else "")
+        checked  = (test) -> return (if test then " checked"  else "")
+  
+        div = $("<div id=addMascot>").html([
+          "<label><span>Image:</span><input type=text name=customIMG value='"
+          if bEdit then (if SS.validImageURL(mEdit.img) then mEdit.img + "'" else "[Base 64 Encoded Image]' disabled=true") else "'"
+          "></label>"
+          "<label title='Auto goes according to the post forms position' for=null><span>Alignment/Offset:</span>"
+          "<select name=mPosition>"
+          "<option" + ((selected bEdit and !mEdit.position) or !bEdit) + ">Auto</option>"
+          "<option" + (selected bEdit and mEdit.position is "top") + ">Top</option>"
+          "<option" + (selected bEdit and mEdit.position is "center") + ">Center</option>"
+          "<option" + (selected bEdit and mEdit.position is "bottom") + ">Bottom</option>"
+          "</select>"
+          "<input type=text name=mOffset value='" + (if bEdit and mEdit.position then mEdit.offset + "px" else "") + "'></label>"
+          "<label title='Prevent streching with smaller images (Width < 313px)'><span>Prevent stretching:</span>"
+          "<input type=checkbox name=mSmall" + (checked bEdit and mEdit.small) + "></label>"
+          "<label title='Horizontally flip the mascot when sidebar is on the left'><span>Flip with sidebar:</span>"
+          "<input type=checkbox name=mFlip" + (checked not bEdit or (bEdit and (mEdit.flip or not mEdit.flip?))) + "></label>"
+          "<label title='Allows the mascot to be shown outside the sidebar, ignores `Prevent stretching` option'>"
+          "<span>Allow overflow:</span><input type=checkbox name=mOverflow" + (checked bEdit and mEdit.overflow) + "></label>"
+          "<label title='List of boards to display @ mascot on, seperated by commas. Example: a,c,g,v,jp'><span>Boards:</span>"
+          "<input type=text name=mBoards value='" + (if bEdit and mEdit.boards then mEdit.boards else "") + "'></label>"
+          "<div>"
+          "<div id=selectImage><input type=file riced=true accept='image/GIF,image/JPEG,image/PNG'>"
+          "<span class=trbtn>Select Image</span></div>"
+          "" + (if bEdit and SS.validBase64(mEdit.img) then "<input type=hidden name=customIMGB64 value='" + mEdit.img + "'>" else "") + ""
+          "<a class=trbtn name=clearIMG>Clear Image</a>"
+          "<a class=trbtn name=" + (if bEdit then "edit" else "add") + ">" + (if bEdit then "edit" else "add") + "</a><a class=trbtn name=cancel>cancel</a></div></div>"
+        ].join "")
+  
+        overlay = $("<div id=overlay2>").append div
+  
+        $("#selectImage>input[type=file]", div).bind "change", SS.options.SelectImage
+        $("a[name=clearIMG]", div).bind "click", SS.options.ClearImage
+  
+        if (bEdit)
+          $("a[name=edit]", div).bind "click", -> SS.options.addMascot mIndex
+        else
+          $("a[name=add]", div).bind "click", SS.options.addMascot
+  
+        $("a[name=cancel]", div).bind "click", -> $("#overlay2").remove()
+  
+        $(d.body).append overlay
+  
+    addMascot: (mIndex) ->
+      overlay = $ "#overlay2"
+  
+      cIMG      = decodeURIComponent $("input[name=customIMGB64]", overlay).val() or $("input[name=customIMG]", overlay).val()
+      cPosition = $("select[name=mPosition]", overlay).val().toLowerCase()
+      cOffset   = parseInt($("input[name=mOffset]", overlay).val()) or 0
+      cSmall    = $("input[name=mSmall]", overlay).val()
+      cFlip     = $("input[name=mFlip]", overlay).val()
+      cOverflow = $("input[name=mOverflow]", overlay).val()
+      cBoards   = $("input[name=mBoards]", overlay).val()
+      bSetPos   = cPosition isnt "auto"
+  
+      return alert("Invalid image URL/base64.") unless SS.validImageURL(cIMG) and SS.validBase64(cIMG)
+  
+      cIMG     = SS.cleanBase64 cIMG
+      bDefault = SS.conf["Mascots"][mIndex] != undefined and SS.conf["Mascots"][mIndex].default
+  
+      if typeof mIndex is "number" and not bDefault
+        SS.conf["Mascots"][mIndex].img      = cIMG
+        SS.conf["Mascots"][mIndex].small    = cSmall
+        SS.conf["Mascots"][mIndex].flip     = cFlip
+        SS.conf["Mascots"][mIndex].overflow = cOverflow
+  
+        if cBoards isnt ""
+          SS.conf["Mascots"][mIndex].boards = cBoards
+        else
+          delete SS.conf["Mascots"][mIndex].boards
+  
+        if bSetPos
+          SS.conf["Mascots"][mIndex].position = cPosition
+          SS.conf["Mascots"][mIndex].offset   = cOffset
+        else
+          delete SS.conf["Mascots"][mIndex].position
+          delete SS.conf["Mascots"][mIndex].offset
+  
+        tMascot = new SS.Image(cIMG)
+        $("#mascot" + mIndex).attr "style", "background:" + tMascot.get()
+  
       else
-        delete SS.conf["Mascots"][mIndex].position
-        delete SS.conf["Mascots"][mIndex].offset
-
-      tMascot = new SS.Image(cIMG)
-      $("#mascot" + mIndex).attr "style", "background:" + tMascot.get()
-
-    else
-      tMascot =
-        img: cIMG
-        small: cSmall
-        flip: cFlip
-        overflow: undefined
-        cOverflow: undefined
-        boards: (if cBoards is "" then undefined else cBoards)
-
-      if bSetPos
-        tMascot.position = cPosition
-        tMascot.offset   = cOffset
-
-        if bDefault
-          SS.options.deleteMascot mIndex
-
-          mIndex = SS.conf["Mascots"].push tMascot
-          tMascot = new SS.Mascot(--mIndex).preview()
-          $("#tMascot").append tMascot
-          tMascot.fire("click").scrollIntoView true
-
-    return overlay.remove()
-
-  deleteMascot: (mIndex) ->
-    if (SS.conf["Mascots"][mIndex].default and SS.conf["Hidden Mascots"].push(mIndex) is 1)
-      $("#tMascot a[name=restoreMascots]").show()
-
-    return (if SS.conf["Mascots"][mIndex].default
-      $("#mascot" + mIndex).removeClass("selected").hide()
-    else $("#mascot" + mIndex).remove())
-
-  SelectImage: ->
-    b64 = val = input = undefined
-    div      = $("#overlay2")
-    parent   = $(@).parent()
-    image    = @files[0]
-    fileName = image.name.substr(image.name.lastIndexOf("\\") + 1)
-    reader   = new FileReader()
-
-    reader.onload = (evt) ->
-      val = SS.cleanBase64 evt.target.result
-
-      b64 = $ "input[name=customIMGB64]", div
-      unless b64.exists()
-        b64 = $("<input type=hidden name=customIMGB64>").val val
-        parent.after b64
-      else
-        b64.val val
-
+        tMascot =
+          img: cIMG
+          small: cSmall
+          flip: cFlip
+          overflow: undefined
+          cOverflow: undefined
+          boards: (if cBoards is "" then undefined else cBoards)
+  
+        if bSetPos
+          tMascot.position = cPosition
+          tMascot.offset   = cOffset
+  
+          if bDefault
+            SS.options.deleteMascot mIndex
+  
+            mIndex = SS.conf["Mascots"].push tMascot
+            tMascot = new SS.Mascot(--mIndex).preview()
+            $("#tMascot").append tMascot
+            tMascot.fire("click").scrollIntoView true
+  
+      return overlay.remove()
+  
+    deleteMascot: (mIndex) ->
+      if (SS.conf["Mascots"][mIndex].default and SS.conf["Hidden Mascots"].push(mIndex) is 1)
+        $("#tMascot a[name=restoreMascots]").show()
+  
+      return (if SS.conf["Mascots"][mIndex].default
+        $("#mascot" + mIndex).removeClass("selected").hide()
+      else $("#mascot" + mIndex).remove())
+  
+    SelectImage: ->
+      b64 = val = input = undefined
+      div      = $("#overlay2")
+      parent   = $(@).parent()
+      image    = @files[0]
+      fileName = image.name.substr(image.name.lastIndexOf("\\") + 1)
+      reader   = new FileReader()
+  
+      reader.onload = (evt) ->
+        val = SS.cleanBase64 evt.target.result
+  
+        b64 = $ "input[name=customIMGB64]", div
+        unless b64.exists()
+          b64 = $("<input type=hidden name=customIMGB64>").val val
+          parent.after b64
+        else
+          b64.val val
+  
+        input = $ "input[name=bgImg]", div
+        if input.exists()
+          input.val(fileName).disabled true
+        else
+          $("input[name=customIMG]", div).val(fileName).disabled true
+  
+      reader.readAsDataURL image
+  
+    ClearImage: ->
+      div = $("#overlay2")
+      $("input[name=customIMGB64]").remove()
       input = $ "input[name=bgImg]", div
-      if input.exists()
-        input.val(fileName).disabled true
-      else
-        $("input[name=customIMG]", div).val(fileName).disabled true
-
-    reader.readAsDataURL image
-
-  ClearImage: ->
-    div = $("#overlay2")
-    $("input[name=customIMGB64]").remove()
-    input = $ "input[name=bgImg]", div
-    return input.val("").disabled false if input.exists()
-
-    $("input[name=customIMG]", div).val("").disabled false
+      return input.val("").disabled false if input.exists()
+  
+      $("input[name=customIMG]", div).val("").disabled false
 
   # THEMES
   Themes:
     defaults: [
       {
-        name:    "Dark Flat",
-        "default":   true,
-        bgImg:     "R0lGODlhAwADAIAAAB0dHRkZGSH5BADoAwAALAAAAAADAAMAAAIDDG5YADs=",
-        bgRPA:     "repeat top left fixed",
-        bgColor:   "202020",
-        mainColor:   "232425",
-        brderColor:  "292a2b",
-        inputColor:  "18191a",
-        inputbColor: "121314",
-        blinkColor:  "6f99b4",
-        jlinkColor:  "ac9bb0",
-        linkColor:   "ac9bb0",
-        linkHColor:  "6f99b4",
-        nameColor:   "a8c6d9",
-        quoteColor:  "b3c45e",
-        textColor:   "dddddd",
-        sageColor:   "c99090",
-        tripColor:   "d4c095",
-        titleColor:  "9390c9",
+        name:        "Dark Flat"
+        "default":   true
+        bgImg:       "R0lGODlhAwADAIAAAB0dHRkZGSH5BADoAwAALAAAAAADAAMAAAIDDG5YADs="
+        bgRPA:       "repeat top left fixed"
+        bgColor:     "202020"
+        mainColor:   "232425"
+        brderColor:  "292a2b"
+        inputColor:  "18191a"
+        inputbColor: "121314"
+        blinkColor:  "6f99b4"
+        jlinkColor:  "ac9bb0"
+        linkColor:   "ac9bb0"
+        linkHColor:  "6f99b4"
+        nameColor:   "a8c6d9"
+        quoteColor:  "b3c45e"
+        textColor:   "dddddd"
+        sageColor:   "c99090"
+        tripColor:   "d4c095"
+        titleColor:  "9390c9"
         timeColor:   "dddddd"
       },{
-        name:    "Photon",
-        "default":   true,
-        bgImg:     false,
-        bgColor:   "eeeeee",
-        mainColor:   "dddddd",
-        brderColor:  "cccccc",
-        inputColor:  "cccccc",
-        inputbColor: "bbbbbb",
-        blinkColor:  "0066ff",
-        jlinkColor:  "333333",
-        linkColor:   "ff6600",
-        linkHColor:  "0066ff",
-        nameColor:   "004a99",
-        quoteColor:  "789922",
-        textColor:   "333333",
-        sageColor:   "990000",
-        tripColor:   "ff3300",
-        timeColor:   "333333",
+        name:        "Photon"
+        "default":   true
+        bgImg:       false
+        bgColor:     "eeeeee"
+        mainColor:   "dddddd"
+        brderColor:  "cccccc"
+        inputColor:  "cccccc"
+        inputbColor: "bbbbbb"
+        blinkColor:  "0066ff"
+        jlinkColor:  "333333"
+        linkColor:   "ff6600"
+        linkHColor:  "0066ff"
+        nameColor:   "004a99"
+        quoteColor:  "789922"
+        textColor:   "333333"
+        sageColor:   "990000"
+        tripColor:   "ff3300"
+        timeColor:   "333333"
         titleColor:  "002244"
       },{
-        name:    "Tomorrow Night", # Originally by Chris Kempson @ https://github.com/ChrisKempson/Tomorrow-Theme
-        author:    "Chris Kempson",
-        "default":   true,
-        bgImg:     false,
-        bgColor:   "1d1f21",
-        mainColor:   "282a2e",
-        brderColor:  "373b41",
-        inputColor:  "282a2e",
-        inputbColor: "1d1f21",
-        blinkColor:  "cc6666",
-        jlinkColor:  "81a2be",
-        linkColor:   "81a2be",
-        linkHColor:  "cc6666",
-        nameColor:   "81a2be",
-        quoteColor:  "b5bd68",
-        textColor:   "c5c8c6",
-        sageColor:   "cc6666",
-        tripColor:   "8abeb7",
-        titleColor:  "b294bb",
+        name:        "Tomorrow Night", # Originally by Chris Kempson @ https://github.com/ChrisKempson/Tomorrow-Theme
+        author:      "Chris Kempson"
+        "default":   true
+        bgImg:       false
+        bgColor:     "1d1f21"
+        mainColor:   "282a2e"
+        brderColor:  "373b41"
+        inputColor:  "282a2e"
+        inputbColor: "1d1f21"
+        blinkColor:  "cc6666"
+        jlinkColor:  "81a2be"
+        linkColor:   "81a2be"
+        linkHColor:  "cc6666"
+        nameColor:   "81a2be"
+        quoteColor:  "b5bd68"
+        textColor:   "c5c8c6"
+        sageColor:   "cc6666"
+        tripColor:   "8abeb7"
+        titleColor:  "b294bb"
         timeColor:   "c5c8c6"
       },{
-        name:    "Yotsuba",
-        "default":   true,
-        bgImg:     "//static.4chan.org/image/fade.png",
-        bgRPA:     "repeat-x top center scroll",
-        bgColor:   "ffffee",
-        mainColor:   "f0e0d6",
-        brderColor:  "d9bFb7",
-        inputColor:  "ffffff",
-        inputbColor: "aaaaaa",
-        blinkColor:  "dd0000",
-        jlinkColor:  "800000",
-        linkColor:   "0000ee",
-        linkHColor:  "dd0000",
-        nameColor:   "117743",
-        quoteColor:  "789922",
-        textColor:   "800000",
-        sageColor:   "cc1111",
-        tripColor:   "228854",
-        titleColor:  "cc1105",
-        timeColor:   "800000",
+        name:        "Yotsuba"
+        "default":   true
+        bgImg:       "//static.4chan.org/image/fade.png"
+        bgRPA:       "repeat-x top center scroll"
+        bgColor:     "ffffee"
+        mainColor:   "f0e0d6"
+        brderColor:  "d9bFb7"
+        inputColor:  "ffffff"
+        inputbColor: "aaaaaa"
+        blinkColor:  "dd0000"
+        jlinkColor:  "800000"
+        linkColor:   "0000ee"
+        linkHColor:  "dd0000"
+        nameColor:   "117743"
+        quoteColor:  "789922"
+        textColor:   "800000"
+        sageColor:   "cc1111"
+        tripColor:   "228854"
+        titleColor:  "cc1105"
+        timeColor:   "800000"
         customCSS:   '#delform,.reply,.hidden_thread,.stub{border-radius:0!important}\n.reply,.hidden_thread,.stub{border-left:0!important;border-top:0!important;"+(SS.conf["Layout"]==1?"border-right:0!important":"")+"}'
       },{
-        name:    "Yotsuba B",
-        "default":   true,
-        bgImg:     "//static.4chan.org/image/fade-blue.png",
-        bgRPA:     "repeat-x top center scroll",
-        bgColor:   "eef2ff",
-        mainColor:   "d6daf0",
-        brderColor:  "b7c5d9",
-        inputColor:  "ffffff",
-        inputbColor: "aaaaaa",
-        blinkColor:  "dd0000",
-        jlinkColor:  "34345C",
-        linkColor:   "34345C",
-        linkHColor:  "dd0000",
-        nameColor:   "117743",
-        quoteColor:  "789922",
-        textColor:   "000000",
-        sageColor:   "990000",
-        tripColor:   "228854",
-        titleColor:  "0f0c5d",
-        timeColor:   "000000",
+        name:        "Yotsuba B"
+        "default":   true
+        bgImg:       "//static.4chan.org/image/fade-blue.png"
+        bgRPA:       "repeat-x top center scroll"
+        bgColor:     "eef2ff"
+        mainColor:   "d6daf0"
+        brderColor:  "b7c5d9"
+        inputColor:  "ffffff"
+        inputbColor: "aaaaaa"
+        blinkColor:  "dd0000"
+        jlinkColor:  "34345C"
+        linkColor:   "34345C"
+        linkHColor:  "dd0000"
+        nameColor:   "117743"
+        quoteColor:  "789922"
+        textColor:   "000000"
+        sageColor:   "990000"
+        tripColor:   "228854"
+        titleColor:  "0f0c5d"
+        timeColor:   "000000"
         customCSS:   '#delform,.reply,.hidden_thread,.stub{border-radius:0!important}\n.reply,.hidden_thread,.stub{border-left:0!important;border-top:0!important;"+(SS.conf["Layout"]==1?"border-right:0!important":"")+"}'
       },{
-        name:    "安心院なじみ",
-        "default":   true,
-        bgImg:     "http://i.imgur.com/RewHm.png",
-        bgRPA:     "no-repeat right bottom fixed",
-        bgColor:   "ffffff",
-        mainColor:   "efefef",
-        brderColor:  "d6d6d6",
-        inputColor:  "cccccc",
-        inputbColor: "bbbbbb",
-        blinkColor:  "f5871f",
-        jlinkColor:  "bf8040",
-        linkColor:   "bf8040",
-        linkHColor:  "bf8040",
-        nameColor:   "2b80c2",
-        quoteColor:  "718c00",
-        textColor:   "4d4d4c",
-        sageColor:   "c82829",
-        tripColor:   "3e999f",
-        titleColor:  "4d4d4d",
+        name:        "安心院なじみ"
+        "default":   true
+        bgImg:       "http://i.imgur.com/RewHm.png"
+        bgRPA:       "no-repeat right bottom fixed"
+        bgColor:     "ffffff"
+        mainColor:   "efefef"
+        brderColor:  "d6d6d6"
+        inputColor:  "cccccc"
+        inputbColor: "bbbbbb"
+        blinkColor:  "f5871f"
+        jlinkColor:  "bf8040"
+        linkColor:   "bf8040"
+        linkHColor:  "bf8040"
+        nameColor:   "2b80c2"
+        quoteColor:  "718c00"
+        textColor:   "4d4d4c"
+        sageColor:   "c82829"
+        tripColor:   "3e999f"
+        titleColor:  "4d4d4d"
         timeColor:   "4d4d4c"
       },{
-        name:    "Midnight Caek",
-        author:    "zixaphir",
-        "default":   true,
-        bgImg:     false,
-        bgColor:   "101010",
-        mainColor:   "1c1c1c",
-        brderColor:  "1c1c1c",
-        inputColor:  "1c1c1c",
-        inputbColor: "101010",
-        blinkColor:  "47475b",
-        jlinkColor:  "57577b",
-        linkColor:   "57577b",
-        linkHColor:  "47475b",
-        nameColor:   "7c2d2d",
-        quoteColor:  "71793e",
-        textColor:   "909090",
-        sageColor:   "7c2d2d",
-        tripColor:   "3e7157",
-        titleColor:  "aaaaaa",
+        name:        "Midnight Caek"
+        author:      "zixaphir"
+        "default":   true
+        bgImg:       false
+        bgColor:     "101010"
+        mainColor:   "1c1c1c"
+        brderColor:  "1c1c1c"
+        inputColor:  "1c1c1c"
+        inputbColor: "101010"
+        blinkColor:  "47475b"
+        jlinkColor:  "57577b"
+        linkColor:   "57577b"
+        linkHColor:  "47475b"
+        nameColor:   "7c2d2d"
+        quoteColor:  "71793e"
+        textColor:   "909090"
+        sageColor:   "7c2d2d"
+        tripColor:   "3e7157"
+        titleColor:  "aaaaaa"
         timeColor:   "909090"
       },{
-        name:    "Solarized", # http://ethanschoonover.com/solarized
-        author:    "Ethan Schoonover",
-        "default":   true,
-        bgImg:     false,
-        bgColor:   "073642",
-        mainColor:   "032b36",
-        brderColor:  "133942",
-        inputColor:  "073642",
-        inputbColor: "0d272e",
-        blinkColor:  "4f5f8f",
-        jlinkColor:  "696fc0",
-        linkColor:   "696bba",
-        linkHColor:  "d33682",
-        nameColor:   "586e75",
-        quoteColor:  "859900",
-        textColor:   "93a1a1",
-        sageColor:   "cc6666",
-        tripColor:   "2aa198",
-        titleColor:  "bec2c4",
-        timeColor:   "93a1a1",
+        name:        "Solarized", # http://ethanschoonover.com/solarized
+        author:      "Ethan Schoonover"
+        "default":   true
+        bgImg:       false
+        bgColor:     "073642"
+        mainColor:   "032b36"
+        brderColor:  "133942"
+        inputColor:  "073642"
+        inputbColor: "0d272e"
+        blinkColor:  "4f5f8f"
+        jlinkColor:  "696fc0"
+        linkColor:   "696bba"
+        linkHColor:  "d33682"
+        nameColor:   "586e75"
+        quoteColor:  "859900"
+        textColor:   "93a1a1"
+        sageColor:   "cc6666"
+        tripColor:   "2aa198"
+        titleColor:  "bec2c4"
+        timeColor:   "93a1a1"
         customCSS:   ".reply{border:0!important}"
       },{
-        name:    "4chan Rewired", # Originally by !K.WeEabo0o @ http://userstyles.org/styles/57787/4chan-rewired
-        author:    "!K.WeEabo0o",
-        "default":   true,
-        bgImg:     "http://oi39.tinypic.com/2h51rb4.jpg",
-        bgRPA:     "no-repeat bottom right fixed",
-        bgColor:   "f4f4f4",
-        mainColor:   "efefef",
-        brderColor:  "d4d4d4",
-        inputColor:  "e4e4e4",
-        inputbColor: "cccccc",
-        blinkColor:  "bf7f3f",
-        jlinkColor:  "bf7f3f",
-        linkColor:   "bf7f3f",
-        linkHColor:  "d33682",
-        nameColor:   "4c4c4c",
-        quoteColor:  "6b7a1e",
-        textColor:   "4c4c4c",
-        sageColor:   "cc6666",
-        tripColor:   "bf7f3f",
-        titleColor:  "4c4c4c",
-        timeColor:   "4c4c4c",
+        name:        "4chan Rewired", # Originally by !K.WeEabo0o @ http://userstyles.org/styles/57787/4chan-rewired
+        author:      "!K.WeEabo0o"
+        "default":   true
+        bgImg:       "http://oi39.tinypic.com/2h51rb4.jpg"
+        bgRPA:       "no-repeat bottom right fixed"
+        bgColor:     "f4f4f4"
+        mainColor:   "efefef"
+        brderColor:  "d4d4d4"
+        inputColor:  "e4e4e4"
+        inputbColor: "cccccc"
+        blinkColor:  "bf7f3f"
+        jlinkColor:  "bf7f3f"
+        linkColor:   "bf7f3f"
+        linkHColor:  "d33682"
+        nameColor:   "4c4c4c"
+        quoteColor:  "6b7a1e"
+        textColor:   "4c4c4c"
+        sageColor:   "cc6666"
+        tripColor:   "bf7f3f"
+        titleColor:  "4c4c4c"
+        timeColor:   "4c4c4c"
         customCSS:   '"+(SS.conf["Layout"]===2?".opContainer{display:block!important;border:1px solid "+this.brderColor.hex+"!important;"+(SS.conf["Sidebar Position"]===3?"margin-left:-"+(SS.conf["Side Margin"]+2)+"px!important;padding-left:"+(SS.conf["Side Margin"]+2)+"px!important}.opContainer,":"}"):"")+".post.reply{background:-webkit-linear-gradient(top,rgba(244,244,244,.8),rgba(239,239,239,.8))!important;background:-moz-linear-gradient(top,rgba(244,244,244,.8),rgba(239,239,239,.8))!important;background:-o-linear-gradient(top,rgba(244,244,244,.8),rgba(239,239,239,.8))!important;box-shadow:0 2px 5px rgba(0,0,0,.05)!important}.reply.highlight,.qphl{border-color:rgba("+this.linkHColor.rgb+",.6)!important}'
       },{
-        name:    "violaceous",
-        author:    "!MaSoOdDwDw",
-        "default":   true,
-        bgImg:     false,
-        bgColor:   "121314",
-        mainColor:   "1b1b1b",
-        brderColor:  "292a2b",
-        inputColor:  "18191a",
-        inputbColor: "121314",
-        blinkColor:  "db95e5",
-        jlinkColor:  "db95e5",
-        linkColor:   "2a7fa0",
-        linkHColor:  "3090b5",
-        nameColor:   "a497b0",
-        quoteColor:  "00ab3f",
-        textColor:   "dddddd",
-        sageColor:   "4f4f4f",
-        tripColor:   "bd2b83",
-        titleColor:  "06989a",
-        timeColor:   "dddddd",
+        name:        "violaceous"
+        author:      "!MaSoOdDwDw"
+        "default":   true
+        bgImg:       false
+        bgColor:     "121314"
+        mainColor:   "1b1b1b"
+        brderColor:  "292a2b"
+        inputColor:  "18191a"
+        inputbColor: "121314"
+        blinkColor:  "db95e5"
+        jlinkColor:  "db95e5"
+        linkColor:   "2a7fa0"
+        linkHColor:  "3090b5"
+        nameColor:   "a497b0"
+        quoteColor:  "00ab3f"
+        textColor:   "dddddd"
+        sageColor:   "4f4f4f"
+        tripColor:   "bd2b83"
+        titleColor:  "06989a"
+        timeColor:   "dddddd"
         customCSS:   ".reply{border:0!important}"
       },{
-        name:    "4chan Dark Upgrade",
-        "default":   true,
-        bgImg:     "http://img85.imageshack.us/img85/4162/4chbg.gif",
-        bgRPA:     "repeat top left fixed",
-        bgColor:   "242424",
-        mainColor:   "333333",
-        brderColor:  "3a3a3a",
-        inputColor:  "2f2f2f",
-        inputbColor: "0f0f0f",
-        blinkColor:  "cccccc",
-        jlinkColor:  "cccccc",
-        linkColor:   "dddddd",
-        linkHColor:  "eeeeee",
-        nameColor:   "ffffff",
-        quoteColor:  "63995b",
-        textColor:   "ffffff",
-        sageColor:   "b17385",
-        tripColor:   "a7dce7",
-        titleColor:  "999999",
-        timeColor:   "aaaaaa",
+        name:        "4chan Dark Upgrade"
+        "default":   true
+        bgImg:       "http://img85.imageshack.us/img85/4162/4chbg.gif"
+        bgRPA:       "repeat top left fixed"
+        bgColor:     "242424"
+        mainColor:   "333333"
+        brderColor:  "3a3a3a"
+        inputColor:  "2f2f2f"
+        inputbColor: "0f0f0f"
+        blinkColor:  "cccccc"
+        jlinkColor:  "cccccc"
+        linkColor:   "dddddd"
+        linkHColor:  "eeeeee"
+        nameColor:   "ffffff"
+        quoteColor:  "63995b"
+        textColor:   "ffffff"
+        sageColor:   "b17385"
+        tripColor:   "a7dce7"
+        titleColor:  "999999"
+        timeColor:   "aaaaaa"
         customCSS:   [
           "#delform{background:rgba(22,22,22,.8)!important;border:0!important;padding:1px!important;box-shadow:rgba(0,0,0,.8) 0 0 10px;}"
           ".postContainer>.reply{background-image:url(http://img714.imageshack.us/img714/3969/4ch2.gif)!important;"
           "border-bottom:#1f1f1f!important;border-radius:5px!important}"
-          ".thread:not(.stub){background:0!important}a:not([href='javascript:;']){text-shadow:#0f0f0f 0 1px;}"
-        ]
+          ".thread:not(.stub){background:0!important}a:not([href=\'javascript:;\']){text-shadow:#0f0f0f 0 1px;}"
+        ].join ""
       },{
-        name:    "AppChan", # Originally by Zixaphir @ http://userstyles.org/styles/54149/appchan
-        author:    "Zixaphir",
-        "default":   true,
-        bgImg:     false,
-        bgColor:   "2c2c2c",
-        mainColor:   "333333",
-        brderColor:  "2c2c2c",
-        inputColor:  "333333",
-        inputbColor: "2c2c2c",
-        blinkColor:  "4f5f8f",
-        jlinkColor:  "6688aa",
-        linkColor:   "6688aa",
-        linkHColor:  "6688aa",
-        nameColor:   "aaaaaa",
-        quoteColor:  "789922",
-        textColor:   "aaaaaa",
-        sageColor:   "aaaaaa",
-        tripColor:   "aaaaaa",
-        titleColor:  "aaaaaa",
-        timeColor:   "aaaaaa",
+        name:        "AppChan", # Originally by Zixaphir @ http://userstyles.org/styles/54149/appchan
+        author:      "Zixaphir"
+        "default":   true
+        bgImg:       false
+        bgColor:     "2c2c2c"
+        mainColor:   "333333"
+        brderColor:  "2c2c2c"
+        inputColor:  "333333"
+        inputbColor: "2c2c2c"
+        blinkColor:  "4f5f8f"
+        jlinkColor:  "6688aa"
+        linkColor:   "6688aa"
+        linkHColor:  "6688aa"
+        nameColor:   "aaaaaa"
+        quoteColor:  "789922"
+        textColor:   "aaaaaa"
+        sageColor:   "aaaaaa"
+        tripColor:   "aaaaaa"
+        titleColor:  "aaaaaa"
+        timeColor:   "aaaaaa"
         customCSS:   ".reply{border:0!important}"
       },{
-        name:    "Vimyanized Dark",
-        author:    "seaweed",
-        "default":   true,
-        bgImg:     false,
-        bgColor:   "090d0f",
-        mainColor:   "0d1114",
-        brderColor:  "0b1316",
-        inputColor:  "090d0f",
-        inputbColor: "0b1316",
-        blinkColor:  "4797cc",
-        jlinkColor:  "4270b2",
-        linkColor:   "53bdb1",
-        linkHColor:  "3090b5",
-        nameColor:   "d63e34",
-        quoteColor:  "96c83b",
-        textColor:   "f8f8f8",
-        sageColor:   "4f4f4f",
-        tripColor:   "d4b63c",
-        titleColor:  "b88cd1",
+        name:        "Vimyanized Dark"
+        author:      "seaweed"
+        "default":   true
+        bgImg:       false
+        bgColor:     "090d0f"
+        mainColor:   "0d1114"
+        brderColor:  "0b1316"
+        inputColor:  "090d0f"
+        inputbColor: "0b1316"
+        blinkColor:  "4797cc"
+        jlinkColor:  "4270b2"
+        linkColor:   "53bdb1"
+        linkHColor:  "3090b5"
+        nameColor:   "d63e34"
+        quoteColor:  "96c83b"
+        textColor:   "f8f8f8"
+        sageColor:   "4f4f4f"
+        tripColor:   "d4b63c"
+        titleColor:  "b88cd1"
         timeColor:   "dddddd"
       },{
-        name:    "Muted",
-        author:    "seaweed",
-        "default":   true,
-        bgImg:     false,
-        bgColor:   "ffffff",
-        mainColor:   "f5f2e9",
-        brderColor:  "cccccc",
-        inputColor:  "ffffff",
-        inputbColor: "cccccc",
-        blinkColor:  "111111",
-        jlinkColor:  "bc312a",
-        linkColor:   "bc312a",
-        linkHColor:  "8e2220",
-        nameColor:   "2c64a0",
-        quoteColor:  "789922",
-        textColor:   "393735",
-        sageColor:   "990000",
-        tripColor:   "cc6563",
-        titleColor:  "111111",
-        timeColor:   "333333",
+        name:        "Muted"
+        author:      "seaweed"
+        "default":   true
+        bgImg:       false
+        bgColor:     "ffffff"
+        mainColor:   "f5f2e9"
+        brderColor:  "cccccc"
+        inputColor:  "ffffff"
+        inputbColor: "cccccc"
+        blinkColor:  "111111"
+        jlinkColor:  "bc312a"
+        linkColor:   "bc312a"
+        linkHColor:  "8e2220"
+        nameColor:   "2c64a0"
+        quoteColor:  "789922"
+        textColor:   "393735"
+        sageColor:   "990000"
+        tripColor:   "cc6563"
+        titleColor:  "111111"
+        timeColor:   "333333"
         customCSS:   ".boardTitle{color:#bc312a!important;text-shadow:1px 1px 1px #772e28!important;}.boardSubtitle,.boardBanner .boardSubtitle>a{text-shadow:none!important;}.postNum a{color:#111111!important;}div.reply a.quotelink{color:#bc312a!important;}"
       },{
-        name:    "Photons + Odin",
-        author:    "!Hu6tDS8lls",
-        "default":   true,
-        bgImg:     "R0lGODlhAwADAIAAAB0dHRkZGSH5BADoAwAALAAAAAADAAMAAAIDDG5YADs=",
-        bgRPA:     "repeat top left fixed",
-        bgColor:   "202020",
-        mainColor:   "1a1a1a",
-        brderColor:  "1f1f1f",
-        inputColor:  "18191a",
-        inputbColor: "121314",
-        blinkColor:  "c72d41",
-        jlinkColor:  "446a6d",
-        linkColor:   "737f88",
-        linkHColor:  "4f585d",
-        nameColor:   "0099bc",
-        quoteColor:  "85c600",
-        textColor:   "dddddd",
-        sageColor:   "c72d41",
-        tripColor:   "ff0085",
-        titleColor:  "ffa600",
+        name:        "Photons + Odin"
+        author:      "!Hu6tDS8lls"
+        "default":   true
+        bgImg:       "R0lGODlhAwADAIAAAB0dHRkZGSH5BADoAwAALAAAAAADAAMAAAIDDG5YADs="
+        bgRPA:       "repeat top left fixed"
+        bgColor:     "202020"
+        mainColor:   "1a1a1a"
+        brderColor:  "1f1f1f"
+        inputColor:  "18191a"
+        inputbColor: "121314"
+        blinkColor:  "c72d41"
+        jlinkColor:  "446a6d"
+        linkColor:   "737f88"
+        linkHColor:  "4f585d"
+        nameColor:   "0099bc"
+        quoteColor:  "85c600"
+        textColor:   "dddddd"
+        sageColor:   "c72d41"
+        tripColor:   "ff0085"
+        titleColor:  "ffa600"
         timeColor:   "ffffff"
       }
     ]
@@ -2011,14 +2016,15 @@ SS =
         @createEntry a, open
         return @hasInit = true
 
-    createEntry: (a, func) -> document.dispatchEvent new CustomEvent "AddMenuEntry",
-      detail: {
-        el:   a
-        open: func
-      }
+    createEntry: (a, fn, type) -> 
+      d.dispatchEvent new CustomEvent "AddMenuEntry", 
+        detail:
+          el:   a
+          open: fn
+          type: type or 'post'
 
   riceInputs:
-    hasInit: false,
+    hasInit: false
     init: ->
       unless @hasInit
         unless SS.browser.webkit
@@ -2036,7 +2042,7 @@ SS =
         @hasInit = false
 
   logoReflect:
-    hasInit: false,
+    hasInit: false
     init: ->
       return if @hasInit
 
@@ -2579,7 +2585,7 @@ SS =
           if theme.customCSS[theme.customCSS.length-1] is ")"
             theme.customCSS += "+\""
 
-          @customCSS = eval SS.trimLineBreaks new String "'#{theme.customCSS}'"
+          @customCSS = eval SS.trimLineBreaks new String '"' + theme.customCSS + '"'
 
         catch e
           alert "Error evaluating " + @name + "'s theme.customCSS!\n" + e.message

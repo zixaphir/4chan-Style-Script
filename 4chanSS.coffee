@@ -742,11 +742,11 @@ SS =
     init: ->
       fn = ->
         $(d).unbind '4chanXInitFinished', fn
-        d.dispatchEvent new CustomEvent 'AddMenuEntry', detail: 
+        d.dispatchEvent new CustomEvent 'AddMenuEntry', detail:
           el:    $('<span>').append($("<a id=themeoptionsLink title='4chan SS Options'>Style Script").bind "click", SS.options.show).elems[0]
           type:  'header'
           order: 999
-      
+
       if $("#header-bar").exists()
         fn()
       else
@@ -986,61 +986,61 @@ SS =
     createMascotsTab: (tOptions) ->
       mascots = $("#tMascot", tOptions).html ""
       p       = $ "<p>"
-  
+
       p.append $("<a class=trbtn name=addMascot>add", tOptions).bind("click", SS.options.showMascot)
       p.append $("<a class=trbtn name=restoreMascots title='Restore hidden default mascots'>restore", tOptions)
         .bind "click", ->
           SS.conf["Hidden Mascots"] = []
           $("#tMascot>div[hidden]").show()
-  
+
       $("a[name=restoreMascots]", p).hide() if SS.conf["Hidden Mascots"].length is 0
-  
+
       p.append $("<a class=trbtn name=selectAll>select all", tOptions)
         .bind "click", -> $("#tMascot>div:not([hidden])").each -> $(@).addClass "selected"
       p.append $("<a class=trbtn name=selectNone>select none", tOptions)
         .bind "click", -> $("#tMascot>div").each -> $(@).removeClass "selected"
-  
+
       mascots.append p
-  
+
       max = SS.conf["Mascots"].length
       i   = i
-  
+
       while i < max
         mascots.append((new SS.Mascot(i++)).preview())
-  
+
     close: ->
       $(d).unbind("keydown", SS.options.keydown)
           .unbind("keyup", SS.options.keydown)
-  
+
       return $("#overlay").remove()
-  
+
     keydown: (e) ->
       if e.keyCode >= 16 and e.keyCode <= 18
         SS.options.saveAndClose = false
         $("a[name=save]").text("apply")
-  
+
     keyup: (e) ->
       unless SS.options.saveAndClose
         SS.options.saveAndClose = true
         $("a[name=save]").text("save")
-  
+
     loadSystemFonts: (e) ->
       loadFontBTN    = $ e.target
       getFontMessage = (e) ->
         SS.fontList = e.data
         fontSelect  = $("<select name=Font>")
-  
+
         for {name, value} in SS.fontList
           fontSelect.append($(
             "<option" + " style=\"font-family:" + SS.formatFont(value) + "!important\"" +
             " value='" + value + "'" + (if value is SS.conf["Font"] then " selected=true" else "") + ">" + name
           ))
-  
+
           $("select[name=Font]").before(fontSelect).remove()
           $("#fontListSWF").remove()
           window.removeEventListener("message", getFontMessage)
           loadFontBTN.text("System Fonts Loaded!").unbind("click", SS.options.loadSystemFonts)
-  
+
       $(d.head).append($("""
   <script type="text/javascript">
     function populateFontList(fontArr) {
@@ -1051,30 +1051,30 @@ SS =
       }
   </script>
   """))
-  
+
       window.addEventListener "message", getFontMessage, false
-  
+
       $(d.body).append($(
         "<div id=fontListSWF hidden><object type='application/x-shockwave-flash'" +
         " data='" + fontListSWF + "'><param name=allowScriptAccess value=always></object>"
       ))
       loadFontBTN.text "Loading..."
-  
+
     save: ->
       div        = $("#themeoptions")
       themes     = []
       mascots    = []
       links      = []
       selMascots = []
-  
+
       # Save main
       $("#themeoptions input[name]:not([name=toTab]), #themeoptions select").each ->
         name = $(@).attr("name")
         val  = $(@).val()
-  
+
         if name is "Font Size"
           val = parseInt val
-  
+
           unless $("input[name='Bitmap Font']", div).val()
             # 4chan SS originally used Math.max and Math.min here.
             # Don't do that.
@@ -1083,22 +1083,22 @@ SS =
             else if val < MIN_FONT_SIZE
               MIN_FONT_SIZE
             else val
-  
+
           else if name is "Nav Link Delimiter"
             val = val.replace /\s/g, "&nbsp;"
-  
+
           SS.Config.set $(@).attr("name"), val
-  
+
       # Save Themes
       $("#themeoptions #tThemes>div").each (index) ->
         oldIndex = parseInt @id.substr(5)
         themes.push SS.conf["Themes"][oldIndex] unless SS.conf["Themes"][oldIndex].default
-  
+
         selTheme = if selTheme = $("#themeoptions #tThemes>div.selected").exists()
           parseInt selTheme.attr("id").substr 5
         else
           0
-  
+
       SS.Config.set "Themes", themes
       SS.Config.set (
         if SS.conf["SFW/NSFW Themes"] and SS.location.nsfw
@@ -1106,50 +1106,50 @@ SS =
         else
           "Selected Theme"
       ), selTheme
-  
+
       SS.Config.set "Hidden Themes", SS.conf["Hidden Themes"]
-  
+
       # Save Mascots
       $("#themeoptions #tMascot>div").each (index) ->
         oldIndex = parseInt @id.substr 6
         selMascots.push index if $(@).hasClass "selected"
-  
+
         mascots.push SS.conf["Mascots"][oldIndex] unlessSS.conf["Mascots"][oldIndex].default
-  
+
         SS.Config.set "Mascots", mascots
         SS.Config.set "Selected Mascots", selMascots
         SS.Config.set "Hidden Mascots", SS.conf["Hidden Mascots"]
-  
+
         # Save nav links
         $("#themeoptions #tNavLinks>.navlink").each ->
           nLink = {}
-  
+
           $(@).children("input").each (index) ->
             if index is 0
               nLink.text = $(@).val()
             else if index is 1
               nLink.link = $(@).val()
-  
+
           links.push nLink if nLink.text isnt "" and nLink.link isnt ""
-  
+
         SS.Config.set "Nav Links", links
-  
+
         SS.options.close() if SS.options.saveAndClose
-  
+
         SS.init true
-  
+
     showTheme: (tIndex) ->
       if typeof tIndex is "number"
         bEdit  = true
         tEdit  = SS.conf["Themes"][tIndex]
-  
+
         if (tEdit.bgImg and tEdit.bgRPA)
           [themeR, themePY, themePX, themeA] = tEdit.bgRPA.split(" ")
-  
+
       div = $("<div id=addTheme>")
-  
+
       check = (test) -> return (if test then " selected" else "")
-  
+
       innerHTML = [
         "<label>"
         "<span>Theme Name:</span><input type=text name=name value='" + (if bEdit then tEdit.name else "") + "'>"
@@ -1178,13 +1178,13 @@ SS =
         "<option#{check bEdit and themePY is "bottom"   }>bottom</option>"
         "</select></label>"
       ]
-  
+
       for {name, dName} in themeInputs
         Array::push.apply innerHTML, [
           "<label><span>" + dName + ":</span>"
           "<input type=text class=jsColor name=" + name + " value=" + (if bEdit then tEdit[name] else "") + "></label>"
         ]
-  
+
       Array::push.apply innerHTML, [
         "<label id=customCSS><span>Custom CSS:</span><textarea name=customCSS>" + (if bEdit then tEdit.customCSS or "" else "") + "</textarea>"
         "</label><div><div id=selectImage><input type=file riced=true accept='image/GIF,image/JPEG,image/PNG'>"
@@ -1194,33 +1194,33 @@ SS =
         "<a class=trbtn name=export>Export</a>"
         "<a class=trbtn name=" + (if bEdit then "edit" else "add") + ">" + (if bEdit then "edit" else "add") + "</a><a class=trbtn name=cancel>cancel</a></div>"
       ]
-  
+
       div.html innerHTML.join ""
       $(".jsColor", div).jsColor()
-  
+
       overlay = $("<div id=overlay2>").append div
-  
+
       $("#selectImage>input[type=file]", div).bind "change", SS.options.SelectImage
       $("a[name=clearIMG]", div).bind "click", SS.options.ClearImage
-  
+
       $("a[name=export]", div).bind "click", ->
         theme = SS.options.addTheme tIndex, true
         window.open ("data:application/json," + encodeURIComponent JSON.stringify theme), "Export " + theme.name
-  
+
       if (bEdit)
         $("a[name=edit]", div).bind "click", -> SS.options.addTheme tIndex
       else
         $("a[name=add]", div).bind "click", SS.options.addTheme
-  
+
       $("a[name=cancel]", div).bind "click", -> $("#overlay2").remove()
-  
+
       if (bEdit)
         $("input,textarea,select", div).bind "change", tEdit.mHandler = ->
           tEdit.modified = true
           $("input,textarea,select", $("#addTheme")).unbind("change", tEdit.mHandler)
-  
+
       $(d.body).append overlay
-  
+
     addTheme: (tIndex, exp) ->
       overlay = $("#overlay2")
       tTheme  = { }
@@ -1231,41 +1231,41 @@ SS =
           $("select[name=bgPX]", overlay).val()
           $("select[name=bgA]",  overlay).val()
         ].join ' '
-  
+
       bEdit = typeof tIndex is "number"
       tEdit = if bEdit then SS.conf["Themes"][tIndex] else null
       error = false
       div
-  
+
       return overlay.remove() if not exp and bEdit and not tEdit.modified
-  
+
       $("input[type=text],textarea", overlay).each ->
         if @name is "bgImg"
           b64 = $ "input[name=customIMGB64]", overlay
           val = if b64.exists() then decodeURIComponent b64.val() else @value
-  
+
           unless val is "" and SS.validImageURL(val) and SS.validBase64(val)
             error = true
             return alert "Invalid image URL/base64."
-  
+
           val = SS.cleanBase64(val)
-  
+
         else if @name is "name"
           val = @value
           val += " [Modded]" if bEdit and tEdit.default and tEdit.name is val
-  
+
         else
           val = @value
-  
+
         tTheme[@name] = val unless val is ""
-  
+
         return if error
-  
+
         if (tTheme.bgImg)
           tTheme.bgRPA = makeRPA()
-  
+
           return tTheme if exp
-  
+
           if bEdit and !tEdit.default
             SS.conf["Themes"][tIndex] = tTheme
             tTheme = new SS.Theme(tIndex)
@@ -1276,30 +1276,30 @@ SS =
             tIndex        = SS.conf["Themes"].push tTheme
             tTheme        = new SS.Theme --tIndex
             div           = tTheme.preview()
-  
+
           $("#overlay #tThemes").append div
-  
+
           $("#theme" + tIndex, $("#overlay")).fire("click").scrollIntoView(true)
-  
+
           return overlay.remove()
-  
+
     deleteTheme: (tIndex) ->
       if SS.conf["Themes"][tIndex].default and SS.conf["Hidden Themes"].push(tIndex) is 1
         $("#tThemes a[name=restoreThemes]").show()
-  
+
       return (if SS.conf["Themes"][tIndex].default
         $("#theme" + tIndex).removeClass("selected").hide()
       else
         $("#theme" + tIndex).remove())
-  
+
     showMascot: (mIndex) ->
       if typeof mIndex is "number"
         bEdit = true
         mEdit = SS.conf["Mascots"][mIndex]
-  
+
         selected = (test) -> return (if test then " selected" else "")
         checked  = (test) -> return (if test then " checked"  else "")
-  
+
         div = $("<div id=addMascot>").html([
           "<label><span>Image:</span><input type=text name=customIMG value='"
           if bEdit then (if SS.validImageURL(mEdit.img) then mEdit.img + "'" else "[Base 64 Encoded Image]' disabled=true") else "'"
@@ -1327,24 +1327,24 @@ SS =
           "<a class=trbtn name=clearIMG>Clear Image</a>"
           "<a class=trbtn name=" + (if bEdit then "edit" else "add") + ">" + (if bEdit then "edit" else "add") + "</a><a class=trbtn name=cancel>cancel</a></div></div>"
         ].join "")
-  
+
         overlay = $("<div id=overlay2>").append div
-  
+
         $("#selectImage>input[type=file]", div).bind "change", SS.options.SelectImage
         $("a[name=clearIMG]", div).bind "click", SS.options.ClearImage
-  
+
         if (bEdit)
           $("a[name=edit]", div).bind "click", -> SS.options.addMascot mIndex
         else
           $("a[name=add]", div).bind "click", SS.options.addMascot
-  
+
         $("a[name=cancel]", div).bind "click", -> $("#overlay2").remove()
-  
+
         $(d.body).append overlay
-  
+
     addMascot: (mIndex) ->
       overlay = $ "#overlay2"
-  
+
       cIMG      = decodeURIComponent $("input[name=customIMGB64]", overlay).val() or $("input[name=customIMG]", overlay).val()
       cPosition = $("select[name=mPosition]", overlay).val().toLowerCase()
       cOffset   = parseInt($("input[name=mOffset]", overlay).val()) or 0
@@ -1353,33 +1353,33 @@ SS =
       cOverflow = $("input[name=mOverflow]", overlay).val()
       cBoards   = $("input[name=mBoards]", overlay).val()
       bSetPos   = cPosition isnt "auto"
-  
+
       return alert("Invalid image URL/base64.") unless SS.validImageURL(cIMG) and SS.validBase64(cIMG)
-  
+
       cIMG     = SS.cleanBase64 cIMG
       bDefault = SS.conf["Mascots"][mIndex] != undefined and SS.conf["Mascots"][mIndex].default
-  
+
       if typeof mIndex is "number" and not bDefault
         SS.conf["Mascots"][mIndex].img      = cIMG
         SS.conf["Mascots"][mIndex].small    = cSmall
         SS.conf["Mascots"][mIndex].flip     = cFlip
         SS.conf["Mascots"][mIndex].overflow = cOverflow
-  
+
         if cBoards isnt ""
           SS.conf["Mascots"][mIndex].boards = cBoards
         else
           delete SS.conf["Mascots"][mIndex].boards
-  
+
         if bSetPos
           SS.conf["Mascots"][mIndex].position = cPosition
           SS.conf["Mascots"][mIndex].offset   = cOffset
         else
           delete SS.conf["Mascots"][mIndex].position
           delete SS.conf["Mascots"][mIndex].offset
-  
+
         tMascot = new SS.Image(cIMG)
         $("#mascot" + mIndex).attr "style", "background:" + tMascot.get()
-  
+
       else
         tMascot =
           img: cIMG
@@ -1388,29 +1388,29 @@ SS =
           overflow: undefined
           cOverflow: undefined
           boards: (if cBoards is "" then undefined else cBoards)
-  
+
         if bSetPos
           tMascot.position = cPosition
           tMascot.offset   = cOffset
-  
+
           if bDefault
             SS.options.deleteMascot mIndex
-  
+
             mIndex = SS.conf["Mascots"].push tMascot
             tMascot = new SS.Mascot(--mIndex).preview()
             $("#tMascot").append tMascot
             tMascot.fire("click").scrollIntoView true
-  
+
       return overlay.remove()
-  
+
     deleteMascot: (mIndex) ->
       if (SS.conf["Mascots"][mIndex].default and SS.conf["Hidden Mascots"].push(mIndex) is 1)
         $("#tMascot a[name=restoreMascots]").show()
-  
+
       return (if SS.conf["Mascots"][mIndex].default
         $("#mascot" + mIndex).removeClass("selected").hide()
       else $("#mascot" + mIndex).remove())
-  
+
     SelectImage: ->
       b64 = val = input = undefined
       div      = $("#overlay2")
@@ -1418,31 +1418,31 @@ SS =
       image    = @files[0]
       fileName = image.name.substr(image.name.lastIndexOf("\\") + 1)
       reader   = new FileReader()
-  
+
       reader.onload = (evt) ->
         val = SS.cleanBase64 evt.target.result
-  
+
         b64 = $ "input[name=customIMGB64]", div
         unless b64.exists()
           b64 = $("<input type=hidden name=customIMGB64>").val val
           parent.after b64
         else
           b64.val val
-  
+
         input = $ "input[name=bgImg]", div
         if input.exists()
           input.val(fileName).disabled true
         else
           $("input[name=customIMG]", div).val(fileName).disabled true
-  
+
       reader.readAsDataURL image
-  
+
     ClearImage: ->
       div = $("#overlay2")
       $("input[name=customIMGB64]").remove()
       input = $ "input[name=bgImg]", div
       return input.val("").disabled false if input.exists()
-  
+
       $("input[name=customIMG]", div).val("").disabled false
 
   # THEMES
@@ -2016,8 +2016,8 @@ SS =
         @createEntry a, open
         return @hasInit = true
 
-    createEntry: (a, fn, type) -> 
-      d.dispatchEvent new CustomEvent "AddMenuEntry", 
+    createEntry: (a, fn, type) ->
+      d.dispatchEvent new CustomEvent "AddMenuEntry",
         detail:
           el:   a
           open: fn

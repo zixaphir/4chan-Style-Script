@@ -2447,9 +2447,7 @@ SS =
       return (minmax color + shift for color in rgb).join ","
 
   Image: class
-    constructor: (img, RPA) ->
-      @img = img
-      @RPA = RPA
+    constructor: (@img, @RPA) -> return @
 
     get: ->
       return (if @img
@@ -2458,7 +2456,7 @@ SS =
             'data:image/' + SS.typeofBase64(@img) + ';base64,' + @img
           else
             @img
-        }')#{if @RPA? then ' ' + @RPG else ''}"
+        }')#{if @RPA? then ' ' + @RPA else ''}"
       else 'none')
 
   Mascot: class

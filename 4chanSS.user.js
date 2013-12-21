@@ -2561,10 +2561,11 @@
       function _Class(img, RPA) {
         this.img = img;
         this.RPA = RPA;
+        return this;
       }
 
       _Class.prototype.get = function() {
-        return (this.img ? "url('" + (SS.validBase64(this.img) ? 'data:image/' + SS.typeofBase64(this.img) + ';base64,' + this.img : this.img) + "')" + (this.RPA != null ? ' ' + this.RPG : '') : 'none');
+        return (this.img ? "url('" + (SS.validBase64(this.img) ? 'data:image/' + SS.typeofBase64(this.img) + ';base64,' + this.img : this.img) + "')" + (this.RPA != null ? ' ' + this.RPA : '') : 'none');
       };
 
       return _Class;

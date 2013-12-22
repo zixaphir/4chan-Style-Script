@@ -519,18 +519,6 @@ class $
 
   hasSingleEl: -> @elems.length is 1
 
-  # INPUT RICE
-  riceFile: -> @each ->
-    that = $ @
-    next = that.next
-    return if that.attr "riced"
-    div = $ "<div class=riceFile><div>BROWSE...</div><span></span>"
-    that.attr("riced", true)
-        .bind("change", -> that.nextSibling("span").text if $("#qr.dump").exists() then "" else @files[0].name)
-        .bind("focus",  -> that.nextSibling("div").addClass "focus")
-        .bind("blur",   -> that.nextSibling("div").removeClass "focus")
-        .parent().prepend div.prepend @
-
   riceCheck: -> @each ->
     click = (e) ->
       e.preventDefault()
@@ -645,10 +633,8 @@ SS =
       MutationObserver = window.MutationObserver or window.WebKitMutationObserver
       SS.options.init()
 
-      $(d).bind("QRDialogCreation", SS.QRDialogCreationHandler)
-                 .bind("QRPostSuccessful",   -> $(".riceFile>span", $("#qr")).text "")
-                 .bind("WatcherThreadAdded", -> $("#watcher").addClass "show")
-                 .delay (-> $(@).removeClass "show"), 2000
+      $(d).bind("WatcherThreadAdded", -> $("#watcher").addClass "show")
+          .delay (-> $(@).removeClass "show"), 2000
 
       observer = new MutationObserver (mutations) ->
         for nodes in mutations
@@ -657,39 +643,10 @@ SS =
 
           observer.observe d, childList: true, subtree: true
 
-          # things that need to change after 4chan X loads.
-          $(d).bind '4chanXInitFinished', ->
-            if not SS.QRhandled and (div = $("#qr")).exists()
-              SS.QRDialogCreationHandler target: div
-              div.bind "change", -> $(@).toggleClass "imgExpanded" if (div = $ "#imageType+label").exists()
-              $("input[type=checkbox]", div).riceCheck() if (div = $ "#updater").exists()
-
     SS.pages.init()
     SS.menuEntries.init()
     SS.riceInputs.init()
     SS.logoReflect.init()
-
-  QRDialogCreationHandler: (e) ->
-    qr = e.target
-
-    $("input[type=file]").riceFile().bind "click", (e) ->
-      return $(@).nextSibling("span").text "" if e.shiftKey
-
-      $(".move", qr).bind "click", -> $("form :focus", qr).blur() if SS.conf["Post Form"] isnt 4
-
-      $("#dump~input", qr).each -> $(@).after $ "<span>#{$(@).attr 'placeholder'}" if SS.conf["Expanding Form Inputs"]
-
-      $("input,textarea,select", qr).bind("focus", -> $("#qr").addClass("focus"))
-                                    .bind "blur",  -> $("#qr").removeClass "focus"
-
-      if SS.conf["Smart Tripcode Hider"]
-        $("input[name=name]").each ->
-          SS.tripHider.init $(@)
-          SS.tripHider.handle(@)
-
-          $("input[type=checkbox]", qr).riceCheck() unless SS.browser.webkit
-
-      SS.QRhandled = true
 
   # CONFIG
   Config:

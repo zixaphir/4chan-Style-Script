@@ -771,25 +771,6 @@
       return this.elems.length === 1;
     };
 
-    $.prototype.riceFile = function() {
-      return this.each(function() {
-        var div, next, that;
-        that = $(this);
-        next = that.next;
-        if (that.attr("riced")) {
-          return;
-        }
-        div = $("<div class=riceFile><div>BROWSE...</div><span></span>");
-        return that.attr("riced", true).bind("change", function() {
-          return that.nextSibling("span").text($("#qr.dump").exists() ? "" : this.files[0].name);
-        }).bind("focus", function() {
-          return that.nextSibling("div").addClass("focus");
-        }).bind("blur", function() {
-          return that.nextSibling("div").removeClass("focus");
-        }).parent().prepend(div.prepend(this));
-      });
-    };
-
     $.prototype.riceCheck = function() {
       return this.each(function() {
         var click, div, _ref;
@@ -913,9 +894,7 @@
       if (reload !== true) {
         MutationObserver = window.MutationObserver || window.WebKitMutationObserver;
         SS.options.init();
-        $(d).bind("QRDialogCreation", SS.QRDialogCreationHandler).bind("QRPostSuccessful", function() {
-          return $(".riceFile>span", $("#qr")).text("");
-        }).bind("WatcherThreadAdded", function() {
+        $(d).bind("WatcherThreadAdded", function() {
           return $("#watcher").addClass("show");
         }).delay((function() {
           return $(this).removeClass("show");
@@ -930,25 +909,9 @@
               node = nodes[_j];
               $("input[type=checkbox]", node).riceCheck();
             }
-            observer.observe(d, {
+            _results.push(observer.observe(d, {
               childList: true,
               subtree: true
-            });
-            _results.push($(d).bind('4chanXInitFinished', function() {
-              var div;
-              if (!SS.QRhandled && (div = $("#qr")).exists()) {
-                SS.QRDialogCreationHandler({
-                  target: div
-                });
-                div.bind("change", function() {
-                  if ((div = $("#imageType+label")).exists()) {
-                    return $(this).toggleClass("imgExpanded");
-                  }
-                });
-                if ((div = $("#updater")).exists()) {
-                  return $("input[type=checkbox]", div).riceCheck();
-                }
-              }
             }));
           }
           return _results;
@@ -958,40 +921,6 @@
       SS.menuEntries.init();
       SS.riceInputs.init();
       return SS.logoReflect.init();
-    },
-    QRDialogCreationHandler: function(e) {
-      var qr;
-      qr = e.target;
-      return $("input[type=file]").riceFile().bind("click", function(e) {
-        if (e.shiftKey) {
-          return $(this).nextSibling("span").text("");
-        }
-        $(".move", qr).bind("click", function() {
-          if (SS.conf["Post Form"] !== 4) {
-            return $("form :focus", qr).blur();
-          }
-        });
-        $("#dump~input", qr).each(function() {
-          if (SS.conf["Expanding Form Inputs"]) {
-            return $(this).after($("<span>" + ($(this).attr('placeholder'))));
-          }
-        });
-        $("input,textarea,select", qr).bind("focus", function() {
-          return $("#qr").addClass("focus");
-        }).bind("blur", function() {
-          return $("#qr").removeClass("focus");
-        });
-        if (SS.conf["Smart Tripcode Hider"]) {
-          $("input[name=name]").each(function() {
-            SS.tripHider.init($(this));
-            SS.tripHider.handle(this);
-            if (!SS.browser.webkit) {
-              return $("input[type=checkbox]", qr).riceCheck();
-            }
-          });
-        }
-        return SS.QRhandled = true;
-      });
     },
     Config: {
       hasGM: typeof GM_deleteValue !== "undefined" && GM_deleteValue !== null,

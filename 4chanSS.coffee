@@ -180,26 +180,15 @@ defaultConfig =
   ]
   "Bitmap Font": [
     false
-    "Check @ if you are using a bitmap font"
-  ]
-  "Nav Links": [
-    { text: "anime & manga",       link: "boards.4chan.org/a/"  }
-    { text: "anime/cute",          link: "boards.4chan.org/c/"  }
-    { text: "technology",          link: "boards.4chan.org/g/"  }
-    { text: "video game generals", link: "boards.4chan.org/vg/" }
-    { text: "otaku culture",       link: "boards.4chan.org/jp/" }
-  ]
-  "Nav Link Delimiter": [
-    "&nbsp;-&nbsp;"
-    "Sets the character which will separate navigation links"
+    "Check this if you are using a bitmap font"
   ]
   "Themes":           []
   "Hidden Themes":    []
+  "Mascots":          []
+  "Hidden Mascots":   []
   "Selected Theme":   0
   "NSFW Theme":       0
   "Selected Mascots": 0
-  "Mascots":          []
-  "Hidden Mascots":   []
 
 MAX_FONT_SIZE = 18
 MIN_FONT_SIZE = 8
@@ -405,12 +394,12 @@ class $
   addClass: (classNames) ->
     classNames = classNames.split " "
     @each ->
-      @className += (if @className then " " else "") name for name in classNames when !$(@).hassClass name
+      @className += (if @className then " " else "") + name for name in classNames when not $(@).hasClass name
       return
 
   hasClass: (className) ->
     return false unless @hasSingleEl() or @elems[0].className?
-    (new RegExp "\\b#{className}\\b").text @elems[0].className
+    (new RegExp "\\b#{className}\\b").test @elems[0].className
 
   removeClass: (classNames) ->
     classNames = classNames.split " "
@@ -720,7 +709,6 @@ SS =
           "<li><label class=selected for=tcbMain>Main</label></li>"
           "<li><label for=tcbThemes>Themes</label></li>"
           "<li><label for=tcbMascots>Mascots</label></li>"
-          "<li><label for=tcbNavLinks>Nav Links</label></li>"
           "</ul><div id=toWrapper><input type=radio name=toTab id=tcbMain hidden checked><div id=tMain>"
           "<p><a class=trbtn name=loadSysFonts title='Reqiures flash'>#{if SS.fontList then 'System Fonts Loaded!' else 'Load System Fonts'}</a></p>"
         ]
@@ -807,96 +795,67 @@ SS =
         else if key is "Mascots"
           optionsHTML.push "</div><input type=radio name=toTab id=tcbMascots hidden><div id=tMascot>"
 
-        else if key is "Nav Links"
-          links = SS.conf["Nav Links"]
+        # checkbox
+        else
           Array::push.apply optionsHTML, [
-            "</div><input type=radio name=toTab id=tcbNavLinks hidden><div id=tNavLinks>"
-            "<p><a class=trbtn name=addLink>add</a>"
-            "<label>Delimiter: "
-            "<input type=text name='Nav Link Delimiter' value='" + SS.conf["Nav Link Delimiter"]
-            "' style='width:40px' title='" + defaultConfig["Nav Link Delimiter"][1] + "'></p>"
+            "<label class=mOption title=\"", des, "\"><span>"
+            key
+            "</span><input", (if val then " checked" else ""), " name='", key, "' ", (if defaultConfig[key][3] is true then " hasSub" else ""), " type=checkbox></label>"
           ]
 
+      Array::push.apply optionsHTML, [
+        "</div></div><div><span id=SSVersion>4chan SS v", VERSION, "</span>"
+        "<a class=trbtn name=save title='Hold any modifier to prevent window from closing'>save</a><a class=trbtn name=cancel>cancel</a></div>"
+      ]
+      tOptions.html optionsHTML.join ""
+      overlay.append tOptions
 
-          if links?
-            for {link, text}, i in links
-              Array::push.apply optionsHTML, [
-                "<div id=navlink" + i + " class=navlink><label>Text: <input type=text value='" + text + "'></label>"
-                "<label>Link: <input type=text value='" + link + "'></label>"
-                "<a class=trbtn name=delLink>remove</a><div class=handle draggable=true></div></div>"
-              ]
-          # checkbox
-          else
-            Array::push.apply optionsHTML, [
-              "<label class=mOption title=\"" + des + "\"><span>" + key + "</span><input" + (if val then " checked" else "")
-              " name='" + key + "' " + (if defaultConfig[key][3] is true then " hasSub" else "")  + " type=checkbox></label>"
-            ]
+      # options window
+      $("#toNav li label", tOptions).bind "click", (e) ->
+        return if $(@).hasClass "selected"
 
-          Array::push.apply optionsHTML, [
-            "</div></div><div><span id=SSVersion>4chan SS v" + VERSION + "</span>"
-            "<a class=trbtn name=save title='Hold any modifier to prevent window from closing'>save</a><a class=trbtn name=cancel>cancel</a></div>"
-          ]
-          tOptions.html optionsHTML.join ""
-          overlay.append tOptions
+        $("#toNav li label.selected").removeClass("selected")
+        $(@).addClass("selected")
 
-          # options window
-          $("#toNav li label", tOptions).bind "click", (e) ->
-            return if $(@).hasClass "selected"
+      $("[hasSub]", tOptions).bind "change", ->
+        id  = @.name.replace(/\s/g, "_") + $(@).val()
+        sub = $("." + id)
 
-            $("#toNav li label.selected").removeClass("selected")
-            $(@).addClass("selected")
+        if sub.exists()
+          sub.each -> $(@).show()
+        else
+           $("[class*='" + @.name.replace(/\s/g, "_") + "']").each -> $(@).hide()
 
-          $("[hasSub]", tOptions).bind "change", ->
-            id  = @.name.replace(/\s/g, "_") + $(@).val()
-            sub = $("." + id)
+      $("a[name=save]", tOptions).bind "click", SS.options.save
+      $("a[name=cancel]",tOptions).bind "click", SS.options.close
+      $(d).bind("keydown", SS.options.keydown)
+          .bind("keyup",   SS.options.keyup)
 
-            if sub.exists()
-              sub.each -> $(@).show()
-            else
-               $("[class*='" + @.name.replace(/\s/g, "_") + "']").each -> $(@).hide()
+      # main tab
+      $("input[name='Font Size']", tOptions).bind("keydown", (e) ->
+        val    = parseInt($(@).val())
+        bitmap = $(@).parent().nextSibling().children("input[name='Bitmap Font']").val()
 
-          $("a[name=save]", tOptions).bind "click", SS.options.save
-          $("a[name=cancel]",tOptions).bind "click", SS.options.close
-          $(d).bind("keydown", SS.options.keydown)
-              .bind("keyup",   SS.options.keyup)
+        if e.keyCode is 38 and val < MAX_FONT_SIZE or bitmap
+          $(@).val("#{++val}px")
+        else if e.keyCode is 40 and val > MIN_FONT_SIZE or bitmap
+          $(@).val("#{--val}px")
+      )
 
-          # main tab
-          $("input[name='Font Size']", tOptions).bind("keydown", (e) ->
-            val    = parseInt($(@).val())
-            bitmap = $(@).parent().nextSibling().children("input[name='Bitmap Font']").val()
+      $("a[name=loadSysFonts]", tOptions).bind "click", SS.options.loadSystemFonts unless SS.fontList
 
-            if e.keyCode is 38 and val < MAX_FONT_SIZE or bitmap
-              $(@).val("#{++val}px")
-            else if e.keyCode is 40 and val > MIN_FONT_SIZE or bitmap
-              $(@).val("#{--val}px")
-          )
+      # themes tab
+      SS.options.createThemesTab  tOptions
 
-          $("a[name=loadSysFonts]", tOptions).bind "click", SS.options.loadSystemFonts unless SS.fontList
+      # mascots tab
+      SS.options.createMascotsTab tOptions
 
-          # themes tab
-          SS.options.createThemesTab  tOptions
-
-          # mascots tab
-          SS.options.createMascotsTab tOptions
-
-          # nav links tab
-          $("a[name=addLink]", tOptions).bind("click", ->
-            el = $("<div id=navlink" + $("#tNavLinks>.navlink").length() + " class=navlink>")
-                      .html("<label>Text: <input type=text></label>" +
-                            "<label>Link: <input type=text value='boards.4chan.org/'></label>" +
-                            "<a class=trbtn name=delLink>remove</a><div class=handle draggable=true></div>")
-            bindNavLinks el
-            $("#tNavLinks").append el
-          )
-
-          $("#tNavLinks .navlink", tOptions).each(-> bindNavLinks(@))
-
-          $(d.body).append(overlay)
+      $(d.body).append overlay
 
     createThemesTab: (tOptions) ->
-      themes = $("#tThemes", tOptions).html("")
-      p      = $("<p style='bottom:8px!important'>")
-      reader = ->
+      themes  = $("#tThemes", tOptions).html("")
+      p       = $("<p style='bottom:8px!important'>")
+      handler = ->
         file   = @files[0]
         reader = new FileReader()
 
@@ -920,8 +879,8 @@ SS =
       p.append($("<a class=trbtn name=addTheme>add", tOptions).bind("click", SS.options.showTheme))
       p.append(
         $("<div id=selectImage>")
-          .append($("<input type=file riced=true>").bind "change", reader)
-            .append $ "<span class=trbtn>Import")
+          .append($("<input type=file riced=true>").bind "change", handler)
+          .append $ "<span class=trbtn>Import")
 
       p.append(
         $("<a class=trbtn name=restoreThemes title='Restore hidden default themes'>restore", tOptions)
@@ -1002,10 +961,9 @@ SS =
   <script type="text/javascript">
     function populateFontList(fontArr) {
       var fontList = []
-      for (var key in fontArr)
-        fontList.push(fontArr[key])
-        window.postMessage(fontList, '*')
-      }
+      for (var key in fontArr) { fontList.push(fontArr[key]) };
+      window.postMessage(fontList, '*');
+    }
   </script>
   """))
 
@@ -1051,10 +1009,10 @@ SS =
         oldIndex = parseInt @id.substr(5)
         themes.push SS.conf["Themes"][oldIndex] unless SS.conf["Themes"][oldIndex].default
 
-        selTheme = if selTheme = $("#themeoptions #tThemes>div.selected").exists()
-          parseInt selTheme.attr("id").substr 5
-        else
-          0
+      selTheme = if (selTheme = $("#themeoptions #tThemes>div.selected")).exists()
+        parseInt selTheme.attr("id").substr 5
+      else
+        0
 
       SS.Config.set "Themes", themes
       SS.Config.set (
@@ -1073,38 +1031,22 @@ SS =
 
         mascots.push SS.conf["Mascots"][oldIndex] unlessSS.conf["Mascots"][oldIndex].default
 
-        SS.Config.set "Mascots", mascots
-        SS.Config.set "Selected Mascots", selMascots
-        SS.Config.set "Hidden Mascots", SS.conf["Hidden Mascots"]
+      SS.Config.set "Mascots", mascots
+      SS.Config.set "Selected Mascots", selMascots
+      SS.Config.set "Hidden Mascots", SS.conf["Hidden Mascots"]
 
-        # Save nav links
-        $("#themeoptions #tNavLinks>.navlink").each ->
-          nLink = {}
+      SS.options.close() if SS.options.saveAndClose
 
-          $(@).children("input").each (index) ->
-            if index is 0
-              nLink.text = $(@).val()
-            else if index is 1
-              nLink.link = $(@).val()
-
-          links.push nLink if nLink.text isnt "" and nLink.link isnt ""
-
-        SS.Config.set "Nav Links", links
-
-        SS.options.close() if SS.options.saveAndClose
-
-        SS.init true
+      SS.init true
 
     showTheme: (tIndex) ->
       if typeof tIndex is "number"
         bEdit  = true
         tEdit  = SS.conf["Themes"][tIndex]
 
-        if (tEdit.bgImg and tEdit.bgRPA)
-          [themeR, themePY, themePX, themeA] = tEdit.bgRPA.split(" ")
+        [themeR, themePY, themePX, themeA] = tEdit.bgRPA.split " " if tEdit.bgImg and tEdit.bgRPA
 
-      div = $("<div id=addTheme>")
-
+      div   = $("<div id=addTheme>")
       check = (test) -> return (if test then " selected" else "")
 
       innerHTML = [
@@ -1138,24 +1080,34 @@ SS =
 
       for {name, dName} in themeInputs
         Array::push.apply innerHTML, [
-          "<label><span>" + dName + ":</span>"
-          "<input type=text class=jsColor name=" + name + " value=" + (if bEdit then tEdit[name] else "") + "></label>"
+          "<label><span>"
+          dName
+          ":</span>"
+          "<input type=text class=jsColor name="
+          name
+          " value="
+          if bEdit then tEdit[name] else ""
+          "></label>"
         ]
 
       Array::push.apply innerHTML, [
-        "<label id=customCSS><span>Custom CSS:</span><textarea name=customCSS>" + (if bEdit then tEdit.customCSS or "" else "") + "</textarea>"
+        "<label id=customCSS><span>Custom CSS:</span><textarea name=customCSS>"
+        if bEdit then tEdit.customCSS or "" else ""
+        "</textarea>"
         "</label><div><div id=selectImage><input type=file riced=true accept='image/GIF,image/JPEG,image/PNG'>"
         "<span class=trbtn>Select Image</span></div>"
-        if bEdit and SS.validBase64(tEdit.bgImg) then "<input type=hidden name=customIMGB64 value='" + tEdit.bgImg + "'>" else ""
+        if bEdit and SS.validBase64 tEdit.bgImg then "<input type=hidden name=customIMGB64 value='" + tEdit.bgImg + "'>" else ""
         "<a class=trbtn name=clearIMG>Clear Image</a>"
         "<a class=trbtn name=export>Export</a>"
-        "<a class=trbtn name=" + (if bEdit then "edit" else "add") + ">" + (if bEdit then "edit" else "add") + "</a><a class=trbtn name=cancel>cancel</a></div>"
+        "<a class=trbtn name="
+        if bEdit then "edit" else "add"
+        ">"
+        if bEdit then "edit" else "add"
+        "</a><a class=trbtn name=cancel>cancel</a></div>"
       ]
 
       div.html innerHTML.join ""
       $(".jsColor", div).jsColor()
-
-      overlay = $("<div id=overlay2>").append div
 
       $("#selectImage>input[type=file]", div).bind "change", SS.options.SelectImage
       $("a[name=clearIMG]", div).bind "click", SS.options.ClearImage
@@ -1176,7 +1128,7 @@ SS =
           tEdit.modified = true
           $("input,textarea,select", $("#addTheme")).unbind("change", tEdit.mHandler)
 
-      $(d.body).append overlay
+      $(d.body).append $("<div id=overlay2>").append div
 
     addTheme: (tIndex, exp) ->
       overlay = $("#overlay2")
@@ -1223,11 +1175,12 @@ SS =
 
           return tTheme if exp
 
-          if bEdit and !tEdit.default
+          if bEdit and not tEdit.default
             SS.conf["Themes"][tIndex] = tTheme
-            tTheme = new SS.Theme(tIndex)
-            div    = $("#theme" + tIndex, $("#overlay"))
-            div.replace(tTheme.preview())
+            tTheme = new SS.Theme tIndex
+            div    = $ "#theme" + tIndex, $ "#overlay"
+            div.replace tTheme.preview()
+
           else
             tTheme.author = "You"
             tIndex        = SS.conf["Themes"].push tTheme
@@ -1236,7 +1189,7 @@ SS =
 
           $("#overlay #tThemes").append div
 
-          $("#theme" + tIndex, $("#overlay")).fire("click").scrollIntoView(true)
+          $("#theme" + tIndex, $ "#overlay").fire("click").scrollIntoView true
 
           return overlay.remove()
 
@@ -2383,15 +2336,15 @@ SS =
 
   # STRUCTS
   Color: class
-    constructor: (value) ->
-      @hex         = "#" + value
+    constructor: (@value) ->
+      @hex         = "#" + @value
       @private_rgb = @calc_rgb()
       @isLight     = SS.isLight @private_rgb
       @rgb         = @private_rgb.join ","
       @hover       = @shiftRGB 16, true
 
     calc_rgb: ->
-      hex = parseInt @hex, 16
+      hex = parseInt @value, 16
       return [ # 0xRRGGBB to [R, G, B]
         (hex >> 16) & 0xFF
         (hex >> 8) & 0xFF
@@ -2573,11 +2526,11 @@ SS =
       ].join '')
 
       $(div).bind "click", ->
-        that = $(@)
+        theme = $(@)
 
-        return if that.hasClass "selected"
-        that.parent().children(".selected").removeClass "selected"
-        that.addClass "selected"
+        return if theme.hasClass "selected"
+        theme.parent().children(".selected").removeClass "selected"
+        theme.addClass "selected"
 
       $("a[title=Delete]", div).bind "click", (e) ->
         e.stopPropagation()

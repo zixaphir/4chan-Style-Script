@@ -20,6 +20,19 @@
     __slice = [].slice,
     __indexOf = [].indexOf || function(item) { for (var i = 0, l = this.length; i < l; i++) { if (i in this && this[i] === item) return i; } return -1; };
 
+  Array.prototype.indexOf = function(val) {
+    var i;
+    i = this.length;
+    while (i--) {
+      if (this[i] === val) {
+        return i;
+      }
+    }
+    return i;
+  };
+
+  __indexOf = [].indexOf;
+
   d = document;
 
   defaultConfig = {

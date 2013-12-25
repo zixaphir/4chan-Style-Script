@@ -440,7 +440,7 @@ class $
       while item = s[--i]
         return new $ null if s[i] is @elems[0] and not t?  # end and no matching siblings
         return new $ t    if s[i] is @elems[0] and t?      # end and matched siblings
-        t = s[i]          if m.elems.indexOf(s[i]) isnt -1 # @ element matches the selector
+        t = s[i]          if s[i] in m.elems               # this element matches the selector
 
     new $ @elems[0].nextSibling
 
@@ -457,7 +457,7 @@ class $
       while item = s[++i]
         return new $ null if s[i] is @elems[0] and not t?  # end and no matching siblings
         return new $ t    if s[i] is @elems[0] and t?      # end and matched siblings
-        t = s[i]          if m.elems.indexOf(s[i]) isnt -1 # @ element matches the selector
+        t = s[i]          if s[i] in m.elems               # this element matches the selector
 
     new $ @elems[0].previousSibling
 
@@ -735,17 +735,35 @@ SS =
           pVal = SS.conf[defaultConfig[key][2]]
           id   = defaultConfig[key][2].replace(/\s/g, "_") + defaultConfig[key][3]
           Array::push.apply optionsHTML, [
-            "<label class='mOption subOption " + id + "' title=\"" + des + "\""
-            (if pVal is defaultConfig[key][3] then "" else "hidden") + "><span>" + key
-            "</span><input" + (if val then " checked" else "") + " name='" + key + "' type=checkbox></label>"
+            "<label class='mOption subOption "
+            id
+            "' title=\""
+            des
+            "\""
+            if pVal is defaultConfig[key][3] then "" else "hidden"
+            "><span>"
+            key
+            "</span><input"
+            if val then " checked" else ""
+            " name='"
+            key
+            "' type=checkbox></label>"
           ]
 
         else if Array.isArray(defaultConfig[key][2]) # select
           opts   = if key is "Font" then SS.fontList or defaultConfig[key][2] else defaultConfig[key][2]
           cFonts = []
           Array::push.apply optionsHTML, [
-            "<span class=mOption title=\"#{des}\"><span>#{key}</span>"
-            "<select name='#{key}'#{if defaultConfig[key][3] is true then ' hasSub' else ''}>"
+            "<span class=mOption title=\""
+            des
+            "\"><span>"
+            key
+            "</span>"
+            "<select name='"
+            key
+            "'"
+            if defaultConfig[key][3] is true then ' hasSub' else ''
+            ">"
           ]
 
           for option in opts
@@ -757,19 +775,26 @@ SS =
             cFonts.push value if key is "Font"
 
             Array::push.apply optionsHTML, [
-              "<option" + (if key is "Font" then " style=\"font-family:" + SS.formatFont(value) + "!important\"" else "")
-              " value='" + value + "'" + (if value is val then " selected" else "") + ">" + name + "</option>"
+              "<option"
+              if key is "Font" then " style=\"font-family:#{SS.formatFont value}!important\"" else ""
+              " value='", value, "'"
+              if value is val then " selected" else ""
+              ">"
+              name
+              "</option>"
             ]
 
-          if key is "Font" and cFonts.indexOf SS.conf["Font"] is -1
-            optionsHTML.push "<option style=\"font-family:" + SS.formatFont(SS.conf["Font"]) + "!important\" value='" + SS.conf["Font"] + "' selected>" + SS.conf["Font"] + "</option>"
+          if key is "Font" and SS.conf["Font"] not in cFonts
+            optionsHTML.push "<option style=\"font-family:#{SS.formatFont SS.conf["Font"]}!important\" value='#{SS.conf["Font"]}' selected>#{SS.conf["Font"]}</option>"
 
           optionsHTML.push "</select></span>"
 
         else if key is "Font Size"
           Array::push.apply optionsHTML, [
-            "<span class=mOption title=\"" + des + "\"><span>" + key + "</span>"
-            "<input type=text name='Font Size' value=" + SS.conf["Font Size"] + "px></span>"
+            "<span class=mOption title=\"", des, "\"><span>"
+            key
+            "</span>"
+            "<input type=text name='Font Size' value=", SS.conf["Font Size"], "px></span>"
           ]
 
         else if key is "Themes"
@@ -790,6 +815,7 @@ SS =
         "</div></div><div><span id=SSVersion>4chan SS v", VERSION, "</span>"
         "<a class=trbtn name=save title='Hold any modifier to prevent window from closing'>save</a><a class=trbtn name=cancel>cancel</a></div>"
       ]
+
       tOptions.html optionsHTML.join ""
       overlay.append tOptions
 
@@ -1309,7 +1335,7 @@ SS =
       div      = $("#overlay2")
       parent   = $(@).parent()
       image    = @files[0]
-      fileName = image.name.substr(image.name.lastIndexOf("\\") + 1)
+      fileName = image.name.substr image.name.lastIndexOf("\\") + 1
       reader   = new FileReader()
 
       reader.onload = (evt) ->
@@ -1818,7 +1844,7 @@ SS =
         mIndex  = Math.floor(Math.random() * eMascot.length)
       else
         eMascot.push j for mascot in SS.conf["Selected Mascots"] when not (
-          SS.conf["Mascots"][mascot].boards? or mascot.boards.split(",").indexOf(SS.location.board) is -1
+          SS.conf["Mascots"][mascot].boards? or SS.location.board not in mascot.boards.split(",")
         )
 
         if eMascot.length is 0
@@ -2360,7 +2386,7 @@ SS =
       else 'none')
 
   Mascot: class
-    constructor: (index) ->
+    constructor: (@index) ->
       if index is -1 # no mascot
         @img  = new SS.Image null
         @hidden = true
@@ -2368,8 +2394,7 @@ SS =
       else
         mascot = SS.conf["Mascots"][index]
 
-      @index    = index
-      @hidden   = SS.conf["Hidden Mascots"].indexOf(index) isnt -1
+      @hidden   = index in SS.conf["Hidden Mascots"]
       @default  = mascot.default
       @position = mascot.position
       @overflow = mascot.overflow
@@ -2389,7 +2414,7 @@ SS =
       @bOffset  = typeof mascot.offset is "number"
       @offset   = if @bOffset then mascot.offset else if SS.conf["Post Form"] isnt 1 then 273 else 23
       @boards   = mascot.boards
-      @enabled  = SS.conf["Selected Mascots"] is 0 or not SS.conf["Selected Mascots"].indexOf(index) is -1
+      @enabled  = SS.conf["Selected Mascots"] is 0 or index in SS.conf["Selected Mascots"]
 
     preview: ->
       div = $([
@@ -2415,7 +2440,7 @@ SS =
       return @hidden = true unless (theme = SS.conf["Themes"][index])?
 
       @index       = index
-      @hidden      = SS.conf["Hidden Themes"].indexOf(index) isnt -1
+      @hidden      = index in SS.conf["Hidden Themes"]
       @name        = theme.name
       @author      = theme.author or "ahodesuka"
       @default     = theme.default

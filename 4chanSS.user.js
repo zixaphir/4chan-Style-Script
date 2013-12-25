@@ -17,7 +17,8 @@
 // ==/UserScript==
 (function() {
   var $, MAX_FONT_SIZE, MIN_FONT_SIZE, NAMESPACE, SS, VERSION, d, defaultConfig, fontListSWF, inputImages, themeInputs,
-    __slice = [].slice;
+    __slice = [].slice,
+    __indexOf = [].indexOf || function(item) { for (var i = 0, l = this.length; i < l; i++) { if (i in this && this[i] === item) return i; } return -1; };
 
   d = document;
 
@@ -601,7 +602,7 @@
     };
 
     $.prototype.nextSibling = function(selector) {
-      var i, item, m, s, t;
+      var i, item, m, s, t, _ref;
       if ((this.hasSingleEl() ? this.elems[0].nextSibling == null : true)) {
         return new $(null);
       }
@@ -617,7 +618,7 @@
           if (s[i] === this.elems[0] && (t != null)) {
             return new $(t);
           }
-          if (m.elems.indexOf(s[i]) !== -1) {
+          if (_ref = s[i], __indexOf.call(m.elems, _ref) >= 0) {
             t = s[i];
           }
         }
@@ -626,7 +627,7 @@
     };
 
     $.prototype.previousSibling = function(selector) {
-      var i, item, m, s, t;
+      var i, item, m, s, t, _ref;
       if ((this.hasSingleEl() ? this.elems[0].previousSibling == null : true)) {
         return new $(null);
       }
@@ -642,7 +643,7 @@
           if (s[i] === this.elems[0] && (t != null)) {
             return new $(t);
           }
-          if (m.elems.indexOf(s[i]) !== -1) {
+          if (_ref = s[i], __indexOf.call(m.elems, _ref) >= 0) {
             t = s[i];
           }
         }
@@ -949,7 +950,7 @@
         }
       },
       show: function() {
-        var bindNavLinks, cFonts, des, id, key, name, option, optionsHTML, opts, overlay, pVal, tOptions, val, value, _i, _len;
+        var bindNavLinks, cFonts, des, id, key, name, option, optionsHTML, opts, overlay, pVal, tOptions, val, value, _i, _len, _ref;
         if ($("#overlay").exists()) {
           SS.options.close();
         } else {
@@ -1002,11 +1003,11 @@
           if (defaultConfig[key][4] === true) {
             pVal = SS.conf[defaultConfig[key][2]];
             id = defaultConfig[key][2].replace(/\s/g, "_") + defaultConfig[key][3];
-            Array.prototype.push.apply(optionsHTML, ["<label class='mOption subOption " + id + "' title=\"" + des + "\"", (pVal === defaultConfig[key][3] ? "" : "hidden") + "><span>" + key, "</span><input" + (val ? " checked" : "") + " name='" + key + "' type=checkbox></label>"]);
+            Array.prototype.push.apply(optionsHTML, ["<label class='mOption subOption ", id, "' title=\"", des, "\"", pVal === defaultConfig[key][3] ? "" : "hidden", "><span>", key, "</span><input", val ? " checked" : "", " name='", key, "' type=checkbox></label>"]);
           } else if (Array.isArray(defaultConfig[key][2])) {
             opts = key === "Font" ? SS.fontList || defaultConfig[key][2] : defaultConfig[key][2];
             cFonts = [];
-            Array.prototype.push.apply(optionsHTML, ["<span class=mOption title=\"" + des + "\"><span>" + key + "</span>", "<select name='" + key + "'" + (defaultConfig[key][3] === true ? ' hasSub' : '') + ">"]);
+            Array.prototype.push.apply(optionsHTML, ["<span class=mOption title=\"", des, "\"><span>", key, "</span>", "<select name='", key, "'", defaultConfig[key][3] === true ? ' hasSub' : '', ">"]);
             for (_i = 0, _len = opts.length; _i < _len; _i++) {
               option = opts[_i];
               if (typeof option === "object") {
@@ -1017,14 +1018,14 @@
               if (key === "Font") {
                 cFonts.push(value);
               }
-              Array.prototype.push.apply(optionsHTML, ["<option" + (key === "Font" ? " style=\"font-family:" + SS.formatFont(value) + "!important\"" : ""), " value='" + value + "'" + (value === val ? " selected" : "") + ">" + name + "</option>"]);
+              Array.prototype.push.apply(optionsHTML, ["<option", key === "Font" ? " style=\"font-family:" + (SS.formatFont(value)) + "!important\"" : "", " value='", value, "'", value === val ? " selected" : "", ">", name, "</option>"]);
             }
-            if (key === "Font" && cFonts.indexOf(SS.conf["Font"] === -1)) {
-              optionsHTML.push("<option style=\"font-family:" + SS.formatFont(SS.conf["Font"]) + "!important\" value='" + SS.conf["Font"] + "' selected>" + SS.conf["Font"] + "</option>");
+            if (key === "Font" && (_ref = SS.conf["Font"], __indexOf.call(cFonts, _ref) < 0)) {
+              optionsHTML.push("<option style=\"font-family:" + (SS.formatFont(SS.conf["Font"])) + "!important\" value='" + SS.conf["Font"] + "' selected>" + SS.conf["Font"] + "</option>");
             }
             optionsHTML.push("</select></span>");
           } else if (key === "Font Size") {
-            Array.prototype.push.apply(optionsHTML, ["<span class=mOption title=\"" + des + "\"><span>" + key + "</span>", "<input type=text name='Font Size' value=" + SS.conf["Font Size"] + "px></span>"]);
+            Array.prototype.push.apply(optionsHTML, ["<span class=mOption title=\"", des, "\"><span>", key, "</span>", "<input type=text name='Font Size' value=", SS.conf["Font Size"], "px></span>"]);
           } else if (key === "Themes") {
             optionsHTML.push("</div><input type=radio name=toTab id=tcbThemes hidden><div id=tThemes>");
           } else if (key === "Mascots") {
@@ -1916,7 +1917,7 @@
         }
       ],
       init: function() {
-        var eMascot, mIndex, mascot, _i, _len, _ref;
+        var eMascot, mIndex, mascot, _i, _len, _ref, _ref1;
         SS.conf["Mascots"] = Array.isArray(SS.conf["Mascots"]) ? this.defaults.concat(SS.conf["Mascots"]) : this.defaults.slice(0);
         eMascot = [];
         if (SS.conf["Selected Mascots"] === 0) {
@@ -1926,7 +1927,7 @@
           _ref = SS.conf["Selected Mascots"];
           for (_i = 0, _len = _ref.length; _i < _len; _i++) {
             mascot = _ref[_i];
-            if (!((SS.conf["Mascots"][mascot].boards != null) || mascot.boards.split(",").indexOf(SS.location.board) === -1)) {
+            if (!((SS.conf["Mascots"][mascot].boards != null) || (_ref1 = SS.location.board, __indexOf.call(mascot.boards.split(","), _ref1) < 0))) {
               eMascot.push(j);
             }
           }
@@ -2436,6 +2437,7 @@
     Mascot: (function() {
       function _Class(index) {
         var mascot;
+        this.index = index;
         if (index === -1) {
           this.img = new SS.Image(null);
           this.hidden = true;
@@ -2443,8 +2445,7 @@
         } else {
           mascot = SS.conf["Mascots"][index];
         }
-        this.index = index;
-        this.hidden = SS.conf["Hidden Mascots"].indexOf(index) !== -1;
+        this.hidden = __indexOf.call(SS.conf["Hidden Mascots"], index) >= 0;
         this["default"] = mascot["default"];
         this.position = mascot.position;
         this.overflow = mascot.overflow;
@@ -2454,7 +2455,7 @@
         this.bOffset = typeof mascot.offset === "number";
         this.offset = this.bOffset ? mascot.offset : SS.conf["Post Form"] !== 1 ? 273 : 23;
         this.boards = mascot.boards;
-        this.enabled = SS.conf["Selected Mascots"] === 0 || !SS.conf["Selected Mascots"].indexOf(index) === -1;
+        this.enabled = SS.conf["Selected Mascots"] === 0 || __indexOf.call(SS.conf["Selected Mascots"], index) >= 0;
       }
 
       _Class.prototype.preview = function() {
@@ -2484,7 +2485,7 @@
           return this.hidden = true;
         }
         this.index = index;
-        this.hidden = SS.conf["Hidden Themes"].indexOf(index) !== -1;
+        this.hidden = __indexOf.call(SS.conf["Hidden Themes"], index) >= 0;
         this.name = theme.name;
         this.author = theme.author || "ahodesuka";
         this["default"] = theme["default"];

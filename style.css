@@ -201,8 +201,6 @@ a.playerLoadAllLink {
 #delform[action='https://sys.4chan.org/f/up.php'] .subject {
     color:" + SS.theme.titleColor.hex + "!important;
 }
-a.linkmail[href='mailto:sage'],
-a.linkmail[href='mailto:sage']:hover,
 #qr .warning,
 span[style='color:#F00000'],
 span[style='color:#FF0000;font-weight:normal'] {

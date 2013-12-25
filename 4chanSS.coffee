@@ -81,15 +81,6 @@ defaultConfig =
     true
     "Style the post information to differ from the actual post."
   ]
-  "Sage Identification": [
-    3
-    "Adds identification to posts that do not bump threads."
-    [
-      { name: "None", value: 1 }
-      { name: "Text", value: 2 }
-      { name: "Icon", value: 3 }
-    ]
-  ]
   "Emoji Position": [
     "after"
     "Changes the location of emoji icons"
@@ -209,19 +200,11 @@ themeInputs   = [
   { dName: "Names",            name: "nameColor",   property: "color"            }
   { dName: "Quote",            name: "quoteColor",  property: "color"            }
   { dName: "Text",             name: "textColor",   property: "color"            }
-  { dName: "Sage",             name: "sageColor",   property: "color"            }
+  { dName: "Extra",            name: "sageColor",   property: "color"            }
   { dName: "Tripcodes",        name: "tripColor",   property: "color"            }
   { dName: "Titles",           name: "titleColor",  property: "color"            }
   { dName: "Timestamps",       name: "timeColor",   property: "color"            }
 ]
-
-__toHexStr = ->
-  s = ""
-  i = 7
-
-  while i-- >= 0
-    s += ((@ >>> (i * 4)) & 0xf).toString 16
-  return s
 
 ###
  STYLE SCRIPT LIBRARY
@@ -2336,23 +2319,24 @@ SS =
 
   # STRUCTS
   Color: class
-    constructor: (@value) ->
-      @hex         = "#" + @value
-      @private_rgb = @calc_rgb()
-      @isLight     = SS.isLight @private_rgb
-      @rgb         = @private_rgb.join ","
-      @hover       = @shiftRGB 16, true
+    minmax = (base) -> if base < 0 then 0 else if base > 255 then 255 else base
 
-    calc_rgb: ->
-      hex = parseInt @value, 16
+    calc_rgb = (value) ->
+      hex = parseInt value, 16
       return [ # 0xRRGGBB to [R, G, B]
         (hex >> 16) & 0xFF
         (hex >> 8) & 0xFF
         hex & 0xFF
       ]
 
+    constructor: (@value) ->
+      @hex         = "#" + value
+      @private_rgb = calc_rgb value
+      @isLight     = SS.isLight @private_rgb
+      @rgb         = @private_rgb.join ","
+      @hover       = @shiftRGB 16, true
+
     shiftRGB: (shift, smart) ->
-      minmax = (base) -> if base < 0 then 0 else if base > 255 then 255 else base
 
       rgb = [@private_rgb...]
       shift = if smart
